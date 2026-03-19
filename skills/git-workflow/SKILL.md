@@ -1,3 +1,10 @@
+---
+name: git-workflow
+description: >
+  Git branch strategy with atomic commits and squash merges. Use when
+  committing, branching, creating PRs, or any git operations.
+---
+
 # Git Workflow
 
 ## Branch Strategy

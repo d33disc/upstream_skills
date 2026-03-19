@@ -1,3 +1,10 @@
+---
+name: tdd
+description: >
+  Red-Green-Refactor TDD workflow. Use when writing tests, implementing
+  features test-first, or when the user asks for TDD discipline.
+---
+
 # TDD Workflow
 
 Always use Red-Green-Refactor:
