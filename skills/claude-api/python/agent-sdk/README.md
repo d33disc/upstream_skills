@@ -115,8 +115,7 @@ Permission modes:
 - `"default"`: Prompt for dangerous operations
 - `"plan"`: Planning only, no execution
 - `"acceptEdits"`: Auto-accept file edits
-- `"dontAsk"`: Don't prompt (useful for CI/CD)
-- `"bypassPermissions"`: Skip all prompts (requires `allow_dangerously_skip_permissions=True` in options)
+- `"bypassPermissions"`: Skip all prompts (use with caution)
 
 ______________________________________________________________________
 
@@ -164,7 +163,9 @@ async for message in query(
         print(message.result)
 ```
 
-Available hook events: `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `Notification`, `UserPromptSubmit`, `SessionStart`, `SessionEnd`, `Stop`, `SubagentStart`, `SubagentStop`, `PreCompact`, `PermissionRequest`, `Setup`, `TeammateIdle`, `TaskCompleted`, `ConfigChange`
+Hook callback inputs for tool-lifecycle events (`PreToolUse`, `PostToolUse`, `PostToolUseFailure`) include `agent_id` and `agent_type` fields, allowing hooks to identify which agent (main or subagent) triggered the tool call.
+
+Available hook events: `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `PreCompact`, `Notification`, `SubagentStart`, `PermissionRequest`
 
 ______________________________________________________________________
 
@@ -176,6 +177,7 @@ ______________________________________________________________________
 async for message in query(prompt="...", options=ClaudeAgentOptions(...)):
 ```
 
+<<<<<<< HEAD
 | Option                               | Type   | Description                                                                |
 | ------------------------------------ | ------ | -------------------------------------------------------------------------- |
 | `cwd`                                | string | Working directory for file operations                                      |
@@ -196,6 +198,27 @@ async for message in query(prompt="...", options=ClaudeAgentOptions(...)):
 | `betas`                              | list   | Beta features to enable (e.g., `["context-1m-2025-08-07"]`)                |
 | `setting_sources`                    | list   | Settings to load (e.g., `["project"]`). Default: none (no CLAUDE.md files) |
 | `env`                                | dict   | Environment variables to set for the session                               |
+=======
+| Option                              | Type   | Description                                                                |
+| ----------------------------------- | ------ | -------------------------------------------------------------------------- |
+| `cwd`                               | string | Working directory for file operations                                      |
+| `allowed_tools`                     | list   | Tools the agent can use (e.g., `["Read", "Edit", "Bash"]`)                |
+| `tools`                             | list   | Built-in tools to make available (restricts the default set)               |
+| `disallowed_tools`                  | list   | Tools to explicitly disallow                                               |
+| `permission_mode`                   | string | How to handle permission prompts                                           |
+| `mcp_servers`                       | dict   | MCP servers to connect to                                                  |
+| `hooks`                             | dict   | Hooks for customizing behavior                                             |
+| `system_prompt`                     | string | Custom system prompt                                                       |
+| `max_turns`                         | int    | Maximum agent turns before stopping                                        |
+| `max_budget_usd`                    | float  | Maximum budget in USD for the query                                        |
+| `model`                             | string | Model ID (default: determined by CLI)                                      |
+| `agents`                            | dict   | Subagent definitions (`dict[str, AgentDefinition]`)                        |
+| `output_format`                     | dict   | Structured output schema                                                   |
+| `thinking`                          | dict   | Thinking/reasoning control                                                 |
+| `betas`                             | list   | Beta features to enable (e.g., `["context-1m-2025-08-07"]`)               |
+| `setting_sources`                   | list   | Settings to load (e.g., `["project"]`). Default: none (no CLAUDE.md files) |
+| `env`                               | dict   | Environment variables to set for the session                               |
+>>>>>>> upstream/main
 
 ______________________________________________________________________
 
@@ -210,8 +233,36 @@ async for message in query(
 ):
     if isinstance(message, ResultMessage):
         print(message.result)
+        print(f"Stop reason: {message.stop_reason}")  # e.g., "end_turn", "max_turns"
     elif isinstance(message, SystemMessage) and message.subtype == "init":
-        session_id = message.session_id  # Capture for resuming later
+        session_id = message.data.get("session_id")  # Capture for resuming later
+```
+
+`AssistantMessage` includes per-turn `usage` data (a dict matching the Anthropic API usage shape) for tracking costs:
+
+```python
+from claude_agent_sdk import query, ClaudeAgentOptions, AssistantMessage
+
+async for message in query(prompt="...", options=ClaudeAgentOptions()):
+    if isinstance(message, AssistantMessage) and message.usage:
+        print(f"Input: {message.usage['input_tokens']}, Output: {message.usage['output_tokens']}")
+```
+
+Typed task message subclasses are available for better type safety when handling subagent task events:
+- `TaskStartedMessage` — emitted when a subagent task is registered
+- `TaskProgressMessage` — real-time progress updates with cumulative usage metrics
+- `TaskNotificationMessage` — task completion notifications
+
+`RateLimitEvent` is emitted when the rate limit status transitions (e.g., from `allowed` to `allowed_warning` or `rejected`). Use it to warn users or back off gracefully:
+
+```python
+from claude_agent_sdk import query, ClaudeAgentOptions, RateLimitEvent
+
+async for message in query(prompt="...", options=ClaudeAgentOptions()):
+    if isinstance(message, RateLimitEvent):
+        print(f"Rate limit status: {message.rate_limit_info.status}")
+        if message.rate_limit_info.resets_at:
+            print(f"Resets at: {message.rate_limit_info.resets_at}")
 ```
 
 ______________________________________________________________________
@@ -259,6 +310,64 @@ except CLIConnectionError as e:
 ```
 
 ______________________________________________________________________
+
+## Session History
+
+Retrieve past session data with top-level functions:
+
+```python
+from claude_agent_sdk import list_sessions, get_session_messages
+
+# List all past sessions (sync function — no await)
+sessions = list_sessions()
+for session in sessions:
+    print(f"{session.session_id}: {session.cwd}")
+
+# Get messages from a specific session (sync function — no await)
+messages = get_session_messages(session_id="...")
+for msg in messages:
+    print(msg)
+```
+
+### Session Mutations
+
+Rename or tag sessions (sync functions — no await):
+
+```python
+from claude_agent_sdk import rename_session, tag_session
+
+# Rename a session
+rename_session(session_id="...", title="My refactoring session")
+
+# Tag a session (tags are Unicode-sanitized automatically)
+tag_session(session_id="...", tag="experiment")
+
+# Clear a tag
+tag_session(session_id="...", tag=None)
+
+# Optionally scope to a specific project directory
+rename_session(session_id="...", title="New title", directory="/path/to/project")
+```
+
+---
+
+## MCP Server Management
+
+Manage MCP servers at runtime using `ClaudeSDKClient`:
+
+```python
+async with ClaudeSDKClient(options=options) as client:
+    # Reconnect a disconnected MCP server
+    await client.reconnect_mcp_server("my-server")
+
+    # Toggle an MCP server on/off
+    await client.toggle_mcp_server("my-server", enabled=False)
+
+    # Get status of all MCP servers
+    status = await client.get_mcp_status()  # returns McpStatusResponse
+```
+
+---
 
 ## Best Practices
 
