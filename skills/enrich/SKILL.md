@@ -57,26 +57,11 @@ Find what the report missed. This creates the novel value.
 
 **Then follow the expanding frontier**: results reveal new entities, each triggers new catalog searches. A drug leads to targets, targets lead to pathways, pathways lead to other diseases, diseases lead to trials, trials lead to companies, companies lead to SEC filings.
 
-Hunt specifically for:
-
-- **Cross-domain connections**: natural products, venom peptides, plant biotech, environmental factors
-- **Market signals**: competitor pipelines, SEC filings, hiring patterns
-- **Mechanism connections**: shared pathways between unrelated diseases, repurposing opportunities
-- **Safety signals**: FAERS data, drug warnings, enforcement actions
+Hunt for cross-domain connections, market signals, mechanism overlaps, and safety gaps. See [references/novelty-detection.md](references/novelty-detection.md) for cross-domain search strategies.
 
 ### Phase 4: Classify Findings
 
-Every finding gets a label:
-
-| Label | What it means |
-|-------|--------------|
-| `VERIFIED` | Original claim confirmed with citations |
-| `CORRECTED` | Original claim was wrong or incomplete |
-| `NOVEL INSIGHT` | Cross-domain connection not in original, T2+ evidence |
-| `NOVEL IP` | New hypothesis with multi-hop evidence chain, commercial potential |
-| `MARKET SIGNAL` | Business-relevant finding from regulatory/financial data |
-
-See [references/novelty-detection.md](references/novelty-detection.md) for definitions and evidence bars.
+Label each finding: VERIFIED, CORRECTED, NOVEL INSIGHT, NOVEL IP, or MARKET SIGNAL. See [references/novelty-detection.md](references/novelty-detection.md) for definitions and evidence bars.
 
 ### Phase 5: Compose PDF
 
@@ -90,28 +75,11 @@ cp ~/.claude/skills/tufte-swiss-typography/assets/tufte-swiss-grid.lua ./
 lualatex --interaction=nonstopmode report.tex
 ```
 
-**The LLM decides**:
+The LLM designs the layout, picks fonts from `fc-list`, and decides what gets callout boxes vs tables vs margin notes vs prose. Non-negotiable: asymmetric Tufte margins (text left, evidence right), margin citations with tier badges, and `lualatex` compilation.
 
-- Document structure, section order, emphasis
-- Font pairing (from 616+ installed OTF fonts, discovered via `fc-list`)
-- Whether findings get callout boxes, tables, prose, margin notes, or full pages
-- Narrative arc — lead with the headline insight or build to it
-- Document length — 2 pages or 12, whatever the content demands
-- Which Tufte design principles to apply where
+**Visual QA loop**: Read every page of the compiled PDF as an image. Fix overlapping text, broken figures, colliding margin notes, bad page breaks. Recompile and re-inspect until every page passes.
 
-**Constraints** (non-negotiable):
-
-- Tufte asymmetric layout: body text left (~65%), evidence in right margin (~35%)
-- Every fact has a margin citation with evidence tier badge
-- Novel findings visually distinct from verified claims
-- Sparklines inline where data trends exist
-- Connection diagrams (TikZ) for multi-hop evidence chains
-- Methodology note stating database count and verification standard
-- Compile with `lualatex`, never pdflatex
-
-**Visual QA loop**: After compiling, read every page of the PDF as an image. Check for overlapping text, broken figures, colliding margin notes, bad page breaks, aesthetic problems. Fix the `.tex`, recompile, re-inspect. Repeat until every page passes.
-
-See [references/composition.md](references/composition.md) for typography primitives, layout patterns, and Tufte's design principles.
+See [references/composition.md](references/composition.md) for tufte-swiss primitives, font selection, Tufte's design principles, and visual QA checklist.
 
 ## Output
 
