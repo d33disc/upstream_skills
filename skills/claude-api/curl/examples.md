@@ -19,14 +19,47 @@ curl https://api.anthropic.com/v1/messages \
   -H "anthropic-version: 2023-06-01" \
   -d '{
     "model": "claude-opus-4-6",
-    "max_tokens": 1024,
+    "max_tokens": 16000,
     "messages": [
       {"role": "user", "content": "What is the capital of France?"}
     ]
   }'
 ```
 
+<<<<<<< HEAD
 ______________________________________________________________________
+=======
+### Parsing the response
+
+Use `jq` to extract fields from the JSON response. Do not use `grep`/`sed` —
+JSON strings can contain any character and regex parsing will break on quotes,
+escapes, or multi-line content.
+
+```bash
+# Capture the response, then extract fields
+response=$(curl -s https://api.anthropic.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{"model":"claude-opus-4-6","max_tokens":16000,"messages":[{"role":"user","content":"Hello"}]}')
+
+# Print the first text block (-r strips the JSON quotes)
+echo "$response" | jq -r '.content[0].text'
+
+# Read usage fields
+input_tokens=$(echo "$response" | jq -r '.usage.input_tokens')
+output_tokens=$(echo "$response" | jq -r '.usage.output_tokens')
+
+# Read stop reason (for tool-use loops)
+stop_reason=$(echo "$response" | jq -r '.stop_reason')
+
+# Extract all text blocks (content is an array; filter to type=="text")
+echo "$response" | jq -r '.content[] | select(.type == "text") | .text'
+```
+
+
+---
+>>>>>>> upstream/main
 
 ## Streaming (SSE)
 
@@ -37,7 +70,7 @@ curl https://api.anthropic.com/v1/messages \
   -H "anthropic-version: 2023-06-01" \
   -d '{
     "model": "claude-opus-4-6",
-    "max_tokens": 1024,
+    "max_tokens": 64000,
     "stream": true,
     "messages": [{"role": "user", "content": "Write a haiku"}]
   }'
@@ -76,7 +109,7 @@ curl https://api.anthropic.com/v1/messages \
   -H "anthropic-version: 2023-06-01" \
   -d '{
     "model": "claude-opus-4-6",
-    "max_tokens": 1024,
+    "max_tokens": 16000,
     "tools": [{
       "name": "get_weather",
       "description": "Get current weather for a location",
@@ -101,7 +134,7 @@ curl https://api.anthropic.com/v1/messages \
   -H "anthropic-version: 2023-06-01" \
   -d '{
     "model": "claude-opus-4-6",
-    "max_tokens": 1024,
+    "max_tokens": 16000,
     "tools": [{
       "name": "get_weather",
       "description": "Get current weather for a location",
@@ -127,6 +160,29 @@ curl https://api.anthropic.com/v1/messages \
 ```
 
 ______________________________________________________________________
+
+## Prompt Caching
+
+Put `cache_control` on the last block of the stable prefix. See `shared/prompt-caching.md` for placement patterns and the silent-invalidator audit checklist.
+
+```bash
+curl https://api.anthropic.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-6",
+    "max_tokens": 16000,
+    "system": [
+      {"type": "text", "text": "<large shared prompt...>", "cache_control": {"type": "ephemeral"}}
+    ],
+    "messages": [{"role": "user", "content": "Summarize the key points"}]
+  }'
+```
+
+For 1-hour TTL: `"cache_control": {"type": "ephemeral", "ttl": "1h"}`. Top-level `"cache_control"` on the request body auto-places on the last cacheable block. Verify hits via the response `usage.cache_creation_input_tokens` / `usage.cache_read_input_tokens` fields.
+
+---
 
 ## Extended Thinking
 
