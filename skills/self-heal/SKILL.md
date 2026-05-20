@@ -12,11 +12,7 @@ metadata:
   type: workflow
   trigger: explicit-or-pipeline-failure
   version: "1.4"
-  related:
-    - superpowers:systematic-debugging
-    - superpowers:test-driven-development
-    - superpowers:verification-before-completion
-    - superpowers:using-git-worktrees
+  related: "superpowers:systematic-debugging, superpowers:test-driven-development, superpowers:verification-before-completion, superpowers:using-git-worktrees"
 ---
 
 # Self-Heal — autonomous code-healing loop
