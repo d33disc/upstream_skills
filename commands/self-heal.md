@@ -1,47 +1,97 @@
 ---
-description: Run the autonomous self-healing code loop. Smart Orchestrator + cheap workers; superpowers:systematic-debugging on every fix.
+description: Run the autonomous self-healing code loop. systematic-debugging on every fix, infrastructure self-heal blocked.
 argument-hint: "[--interactive | --autonomous] [company-list]"
 ---
 
-Invoke the `self-heal` skill via the Skill tool and follow it exactly.
+Run the `self-heal` skill at `~/code/upstream_skills/skills/self-heal/SKILL.md` (symlinked into `~/.claude/skills/self-heal/`).
 
-The skill lives at `~/code/upstream_skills/skills/self-heal/SKILL.md` (symlinked into `~/.claude/skills/self-heal/SKILL.md`). It defines the operational protocol — invariants, risk score, subagent policy, commit attribution.
+# Step 1 — Parse `$ARGUMENTS`
 
-# Arguments
+Tokenize `$ARGUMENTS` on whitespace. Then:
 
-`$ARGUMENTS` may contain a mode flag and an optional company list:
+- If the first token is `--autonomous`, set `MODE=autonomous` and consume the token.
+- Else if the first token is `--interactive`, set `MODE=interactive` and consume the token.
+- Otherwise, default `MODE=interactive`.
 
-- `--interactive` (default) — auto-heal `safe`-tier (R<=2) fixes only when tests + lint + signal-cleared + systematic-debugging Phase 4 all pass. Open PRs for `review`-tier (3<=R<6). Escalate `hard`-tier (R>=6) to the user immediately with `advisor()` consult first.
-- `--autonomous` — overnight mode. Auto-merge safes under the same gates. Park (don't halt) on MEMORY.md ceiling, individual-company hard fixes, and non-critical hygiene escalations. Correctness and liveness invariants still hard-halt.
+Remaining tokens form the `COMPANIES` list (may be empty — empty means "resume any companies with unfinished `reports/<slug>/`").
 
-Anything not matching `--interactive|--autonomous` is treated as the company list (slugs or names).
+# Step 2 — Pre-flight
 
-# Before starting
+Before invoking the skill:
 
-1. **Verify cwd is dd-bigbio or a configured equivalent.** If not, the skill's invariants (verified.json, audit_gate, --skip-to-step) won't apply. Refuse and ask the user to specify the truth-vector artifact, pipeline entry point, and audit gate for the current repo.
-2. **Check pipeline isn't already mid-run.** `pgrep -fc "src.dd_pipeline"` must be 0 or only background-safe workers.
-3. **Assert invariants once before entering the loop.** If any correctness/liveness invariant fails on entry, surface it and stop — do not enter the loop on a corrupted state.
+```bash
+SELF_HEAL_DIR="$HOME/code/upstream_skills/skills/self-heal"
+POLICY="$SELF_HEAL_DIR/scripts/policy.py"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-# The discipline
+python3 "$POLICY" validate-config --repo-root "$REPO_ROOT"
+PIPELINE_ENTRY="$(python3 "$POLICY" config-value pipeline.entry --repo-root "$REPO_ROOT")"
+STATE_DIR="$(python3 "$POLICY" config-value paths.state_dir --repo-root "$REPO_ROOT")"
+HEARTBEAT_INTERVAL="$(python3 "$POLICY" config-value heartbeat.interval_seconds --repo-root "$REPO_ROOT")"
+PIPELINE_COUNT="$(pgrep -fc "$PIPELINE_ENTRY" || true)"
+test "$PIPELINE_COUNT" = "0"
+```
 
-Rule zero of the skill: **every fix runs `superpowers:systematic-debugging` end-to-end, all four phases.** No exceptions, no shortcuts, regardless of risk class. That is the consistency mechanism — fixes look identical every time because the same skill produced them. Phase 4 completion is required for auto-merge; if a subagent exits before Phase 4, the PR is demoted to review-tier.
+1. **Policy validation.** `policy.py validate-config` verifies cwd is dd-bigbio OR a `.self-heal.toml` exists at the repo root. If neither exists it refuses with: "self-heal requires either the dd-bigbio repo or a .self-heal.toml config."
+2. **Check no pipeline is mid-run.** `pgrep -fc "$PIPELINE_ENTRY"` must be 0.
+3. **Run a one-shot invariant assertion** (correctness + liveness only — hygiene is the loop's job). If any fails on entry, surface it and abort. Do not enter the loop on a corrupted state.
 
-After tests pass and Phase 4 completes, the loop ALSO verifies the original failing signal (ERROR line, audit_gate exit code, adversarial finding) is actually gone. "Tests pass" is necessary but not sufficient.
+# Step 3 — Start the heartbeat daemon
 
-# Commit attribution (mandatory)
+```bash
+python3 "$SELF_HEAL_DIR/scripts/heartbeat_writer.py" \
+  --state-dir "$STATE_DIR" --interval "$HEARTBEAT_INTERVAL" &
+HEARTBEAT_PID=$!
 
-Every heal commit carries:
+cleanup_self_heal_heartbeat() {
+  kill "$HEARTBEAT_PID" 2>/dev/null || true
+  wait "$HEARTBEAT_PID" 2>/dev/null || true
+}
+
+trap cleanup_self_heal_heartbeat EXIT
+trap 'cleanup_self_heal_heartbeat; exit 130' INT
+trap 'cleanup_self_heal_heartbeat; exit 143' TERM
+```
+
+The trap is mandatory. The heartbeat process must stop when the loop exits, is interrupted, or hard-halts.
+
+# Step 4 — Invoke the skill
+
+Invoke the `self-heal` skill via the Skill tool with the parsed arguments in the prompt:
+
+```
+Skill("self-heal", "MODE=<MODE> COMPANIES=<comma-separated-list>")
+```
+
+The skill body reads MODE and COMPANIES from the invocation prompt and runs the five-step loop accordingly.
+
+# Step 5 — The discipline (reminder)
+
+Rule zero of the skill: **every bug fix runs `superpowers:systematic-debugging` end-to-end (all four phases).** No exceptions. The enforcement chain is three layers (SessionStart hook + dispatch prompt + commit-trailer audit) — see the SKILL.md's Enforcement chain section.
+
+Hard-blocked paths cannot be auto-healed regardless of risk class: `audit_gate`, the skill itself, `scripts/bug_signature.py`, `scripts/heartbeat_writer.py`, anything in `.self-heal/`. Check them with:
+
+```bash
+git diff --name-only main...HEAD \
+  | python3 "$POLICY" blocked-paths --repo-root "$REPO_ROOT" --stdin
+```
+
+Any output escalates to the user.
+
+After tests pass AND Phase 4 completes AND the original failing signal has cleared, the loop auto-merges `safe`-tier (R<=2) PRs in `--interactive` mode; in `--autonomous` mode the same gates apply and non-critical escalations are parked instead of halting.
+
+# Commit trailer (mandatory, written by the orchestrator)
 
 ```text
 Heal-Model: claude-<model-id>
 Heal-Risk: R=<n> (<class>)
-Heal-Bug: <sha1-signature>
+Heal-Bug: <sha1-from-bug_signature.py>
 Heal-SystematicDebugging-Phase: 4
 Heal-Signal-Cleared: yes
 ```
 
-`Auto` routing is banned — every dispatch names the model so `git log --grep='Heal-Model:'` gives a clean audit trail months later.
+`Auto` model routing is banned.
 
 # Now begin
 
-Read the SKILL.md if it isn't already loaded, set up the heartbeat at `reports/_runs/heartbeat.json`, parse `$ARGUMENTS`, and enter the loop.
+Parse `$ARGUMENTS`, run pre-flight, start the heartbeat daemon, then invoke the skill.
