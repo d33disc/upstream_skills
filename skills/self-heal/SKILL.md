@@ -17,7 +17,7 @@ description: |
 metadata:
   type: workflow
   trigger: explicit-or-pipeline-failure
-  version: "1.1"
+  version: "1.2"
   related:
     - superpowers:systematic-debugging
     - superpowers:test-driven-development
@@ -31,7 +31,31 @@ The full operational protocol (697-line v1 with design rationale, document chang
 
 `~/.claude/projects/-Users-davis-code-dd-bigbio/memory/project_self_healing_loop_prompt.md`
 
-That memory auto-loads inside dd-bigbio sessions. From any other working directory, read it explicitly via `Read` before starting a long run. **This SKILL.md is v1.1** — a procedurally-sufficient subset of v1 plus the hindsight-refinement deltas listed at the end.
+That memory auto-loads inside dd-bigbio sessions. From any other working directory, read it explicitly via `Read` before starting a long run. **This SKILL.md is v1.2** — a procedurally-sufficient subset of v1 plus the hindsight-refinement deltas listed at the end.
+
+## The four-step canonical loop
+
+```text
++--------------------+   +--------------------+   +--------------------+   +--------------------+
+| 1. AUTONOMOUS RUN  |   | 2. FIND BUG        |   | 3. FIX             |   | 4. RESTART RUN     |
+|                    |   |                    |   |                    |   |                    |
+| Pipeline executes  |-->| Haiku Explore      |-->| Sonnet/Opus        |-->| Pipeline resumes   |
+| Steps 0..9, emits  |   | subagents grep new |   | subagent invokes   |   | from last-known-   |
+| logs + run_summary |   | signals matching   |   | superpowers:       |   | good schema-valid  |
+| + adversarial +    |   | the bug-signal     |   | systematic-        |   | checkpoint via     |
+| audit_gate         |   | whitelist          |   | debugging          |   | --skip-to-step N+1 |
+|                    |   |                    |   | (Phases 1..4)      |   | (never Step 0)     |
++--------------------+   +--------------------+   +--------------------+   +--------------------+
+        ^                                                                            |
+        |                                                                            |
+        +--- loop back, repeat until termination (see Termination section) ----------+
+```
+
+**Step 3 is the load-bearing step.** Every bug fix — regardless of risk class, regardless of how trivial the fix looks — invokes `superpowers:systematic-debugging` and runs it end-to-end through all four phases (Reproduce, Localize, Fix, Verify). No exceptions. That is the protocol for every bug repair, and it is what makes fixes look identical across runs: the same skill produced them.
+
+The subagent records its highest completed phase in the `Heal-SystematicDebugging-Phase:` commit trailer. If it exits before Phase 4, the PR is demoted to review-tier even if the risk score would otherwise allow auto-merge — see Rule zero for the gate semantics.
+
+The remaining sections of this skill specify: what counts as a bug (step 2's whitelist), how to score fix risk (step 3's auto-merge eligibility), how to compute the resume checkpoint (step 4's `--skip-to-step` argument), and which invariants must hold across every cycle (the guardrails the loop never lowers to make progress).
 
 ## Rule zero — every fix runs systematic-debugging, end-to-end
 
@@ -310,6 +334,13 @@ Without these three, the loop runs but the invariants degrade to "tests pass + l
 - Auto-trigger: a watching session detecting a bug-signal whitelist match in `pipeline.log` and offering to enter the loop
 
 Before starting any unattended overnight run, verify schema coverage is broad enough that checkpoint condition #2 (schema-valid artifact at every step boundary) is meaningful. See the JSON-schema-harmonization plan at `~/code/dd-bigbio/docs/superpowers/plans/2026-05-20-json-schema-harmonization.md` — until that ships, only `DDSignalReport` and `RunSummary` are schema-gated. Unattended scaling past one company at a time is unsafe until the rest are covered.
+
+## v1.2 deltas vs. v1.1
+
+Folded in 2026-05-20:
+
+1. **Four-step canonical loop diagram added at the top.** Surfaces the simple flow — autonomous run -> find bug -> fix with systematic-debugging -> restart run — before any of the protocol detail. Operator-facing summary; behavioral protocol unchanged.
+2. **Step 3 named as the load-bearing step.** `superpowers:systematic-debugging` is the explicit protocol for every bug repair, called out twice (in the four-step diagram and in Rule zero) so a reader skimming either section reaches the same conclusion.
 
 ## v1.1 deltas vs. project-memory v1
 
