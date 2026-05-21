@@ -25,7 +25,7 @@ client := anthropic.NewClient(
 )
 ```
 
-______________________________________________________________________
+---
 
 ## Basic Message Request
 
@@ -48,7 +48,7 @@ for _, block := range response.Content {
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Streaming
 
@@ -76,9 +76,6 @@ if err := stream.Err(); err != nil {
 }
 ```
 
-<<<<<<< HEAD
-______________________________________________________________________
-=======
 **Accumulating the final message** (there is no `GetFinalMessage()` on the stream):
 
 ```go
@@ -93,7 +90,6 @@ if err := stream.Err(); err != nil { log.Fatal(err) }
 
 
 ---
->>>>>>> upstream/main
 
 ## Tool Use
 

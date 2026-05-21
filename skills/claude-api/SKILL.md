@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-______________________________________________________________________
-
-## name: claude-api description: > Build apps with the Claude API or Anthropic SDK. TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`/`claude_agent_sdk`, or user asks to use Claude API, Anthropic SDKs, or Agent SDK. DO NOT TRIGGER when: code imports `openai`/other AI SDK, general programming, or ML/data-science tasks
-=======
 ---
 name: claude-api
 description: "Build, debug, and optimize Claude API / Anthropic SDK apps. Apps built with this skill should include prompt caching. Also handles migrating existing Claude API code between Claude model versions (4.5 → 4.6, 4.6 → 4.7, retired-model replacements). TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`; user asks for the Claude API, Anthropic SDK, or Managed Agents; user adds/modifies/tunes a Claude feature (caching, thinking, compaction, tool use, batch, files, citations, memory) or model (Opus/Sonnet/Haiku) in a file; questions about prompt caching / cache hit rate in an Anthropic SDK project. SKIP: file imports `openai`/other-provider SDK, filename like `*-openai.py`/`*-generic.py`, provider-neutral code, general programming/ML."
 license: Complete terms in LICENSE.txt
 ---
->>>>>>> upstream/main
 
 # Building LLM-Powered Applications with Claude
 
@@ -42,7 +36,7 @@ For the Claude model version, please use Claude Opus 4.7, which you can access v
 If the User Request at the bottom of this prompt is a bare subcommand string (no prose), search every **Subcommands** table in this document — including any in sections appended below — and follow the matching Action column directly. This lets users invoke specific flows via `/claude-api <subcommand>`. If no table in the document matches, treat the request as normal prose.
 
 
-______________________________________________________________________
+---
 
 ## Language Detection
 
@@ -61,22 +55,22 @@ Before reading code examples, determine which language the user is working in:
    - `*.cs`, `*.csproj` → **C#** — read from `csharp/`
    - `*.php`, `composer.json` → **PHP** — read from `php/`
 
-1. **If multiple languages detected** (e.g., both Python and TypeScript files):
+2. **If multiple languages detected** (e.g., both Python and TypeScript files):
 
    - Check which language the user's current file or question relates to
    - If still ambiguous, ask: "I detected both Python and TypeScript files. Which language are you using for the Claude API integration?"
 
-1. **If language can't be inferred** (empty project, no source files, or unsupported language):
+3. **If language can't be inferred** (empty project, no source files, or unsupported language):
 
    - Use AskUserQuestion with options: Python, TypeScript, Java, Go, Ruby, cURL/raw HTTP, C#, PHP
    - If AskUserQuestion is unavailable, default to Python examples and note: "Showing Python examples. Let me know if you need a different language."
 
-1. **If unsupported language detected** (Rust, Swift, C++, Elixir, etc.):
+4. **If unsupported language detected** (Rust, Swift, C++, Elixir, etc.):
 
    - Suggest cURL/raw HTTP examples from `curl/` and note that community SDKs may exist
    - Offer to show Python or TypeScript examples as reference implementations
 
-1. **If user needs cURL/raw HTTP examples**, read from `curl/`.
+5. **If user needs cURL/raw HTTP examples**, read from `curl/`.
 
 ### Language-Specific Feature Support
 
@@ -93,7 +87,7 @@ Before reading code examples, determine which language the user is working in:
 
 > **Managed Agents code examples**: dedicated language-specific READMEs are provided for Python, TypeScript, Go, Ruby, PHP, Java, and cURL (`{lang}/managed-agents/README.md`, `curl/managed-agents.md`). Read your language's README plus the language-agnostic `shared/managed-agents-*.md` concept files. **Agents are persistent — create once, reference by ID.** Store the agent ID returned by `agents.create` and pass it to every subsequent `sessions.create`; do not call `agents.create` in the request path. The Anthropic CLI is one convenient way to create agents and environments from version-controlled YAML — its URL is in `shared/live-sources.md`. If a binding you need isn't shown in the README, WebFetch the relevant entry from `shared/live-sources.md` rather than guess. C# does not currently have Managed Agents support; use cURL-style raw HTTP requests against the API.
 
-______________________________________________________________________
+---
 
 ## Which Surface Should I Use?
 
@@ -151,7 +145,7 @@ Before choosing the agent tier, check all four criteria:
 
 If the answer is "no" to any of these, stay at a simpler tier (single call or workflow).
 
-______________________________________________________________________
+---
 
 ## Architecture
 
@@ -165,7 +159,7 @@ Everything goes through `POST /v1/messages`. Tools and output constraints are fe
 
 **Supporting endpoints** — Batches (`POST /v1/messages/batches`), Files (`POST /v1/files`), Token Counting, and Models (`GET /v1/models`, `GET /v1/models/{id}` — live capability/context-window discovery) feed into or support Messages API requests.
 
-______________________________________________________________________
+---
 
 ## Current Models (cached: 2026-04-15)
 
@@ -182,13 +176,9 @@ ______________________________________________________________________
 
 A note: if any of the model strings above look unfamiliar to you, that's to be expected — that just means they were released after your training data cutoff. Rest assured they are real models; we wouldn't mess with you like that.
 
-<<<<<<< HEAD
-______________________________________________________________________
-=======
 **Live capability lookup:** The table above is cached. When the user asks "what's the context window for X", "does X support vision/thinking/effort", or "which models support Y", query the Models API (`client.models.retrieve(id)` / `client.models.list()`) — see `shared/models.md` for the field reference and capability-filter examples.
 
 ---
->>>>>>> upstream/main
 
 ## Thinking & Effort (Quick Reference)
 
@@ -204,7 +194,7 @@ ______________________________________________________________________
 
 **Older models (only if explicitly requested):** If the user specifically asks for Sonnet 4.5 or another older model, use `thinking: {type: "enabled", budget_tokens: N}`. `budget_tokens` must be less than `max_tokens` (minimum 1024). Never choose an older model just because the user mentions `budget_tokens` — use Opus 4.7 with adaptive thinking instead.
 
-______________________________________________________________________
+---
 
 ## Compaction (Quick Reference)
 
@@ -214,7 +204,7 @@ ______________________________________________________________________
 
 See `{lang}/claude-api/README.md` (Compaction section) for code examples. Full docs via WebFetch in `shared/live-sources.md`.
 
-______________________________________________________________________
+---
 
 ## Prompt Caching (Quick Reference)
 
@@ -291,25 +281,6 @@ After detecting the language, read the relevant files based on what the user nee
 Read the **language-specific Claude API folder** (`{language}/claude-api/`):
 
 1. **`{language}/claude-api/README.md`** — **Read this first.** Installation, quick start, common patterns, error handling.
-<<<<<<< HEAD
-1. **`shared/tool-use-concepts.md`** — Read when the user needs function calling, code execution, memory, or structured outputs. Covers conceptual foundations.
-1. **`{language}/claude-api/tool-use.md`** — Read for language-specific tool use code examples (tool runner, manual loop, code execution, memory, structured outputs).
-1. **`{language}/claude-api/streaming.md`** — Read when building chat UIs or interfaces that display responses incrementally.
-1. **`{language}/claude-api/batches.md`** — Read when processing many requests offline (not latency-sensitive). Runs asynchronously at 50% cost.
-1. **`{language}/claude-api/files-api.md`** — Read when sending the same file across multiple requests without re-uploading.
-1. **`shared/error-codes.md`** — Read when debugging HTTP errors or implementing error handling.
-1. **`shared/live-sources.md`** — WebFetch URLs for fetching the latest official documentation.
-
-> **Note:** For Java, Go, Ruby, C#, PHP, and cURL — these have a single file each covering all basics. Read that file plus `shared/tool-use-concepts.md` and `shared/error-codes.md` as needed.
-
-### Agent SDK
-
-Read the **language-specific Agent SDK folder** (`{language}/agent-sdk/`). Agent SDK is available for **Python and TypeScript only**.
-
-1. **`{language}/agent-sdk/README.md`** — Installation, quick start, built-in tools, permissions, MCP, hooks.
-1. **`{language}/agent-sdk/patterns.md`** — Custom tools, hooks, subagents, MCP integration, session resumption.
-1. **`shared/live-sources.md`** — WebFetch URLs for current Agent SDK docs.
-=======
 2. **`shared/tool-use-concepts.md`** — Read when the user needs function calling, code execution, memory, or structured outputs. Covers conceptual foundations.
 3. **`shared/agent-design.md`** — Read when designing an agent: bash vs. dedicated tools, programmatic tool calling, tool search/skills, context editing vs. compaction vs. memory, caching principles.
 4. **`{language}/claude-api/tool-use.md`** — Read for language-specific tool use code examples (tool runner, manual loop, code execution, memory, structured outputs).
@@ -324,9 +295,8 @@ Read the **language-specific Agent SDK folder** (`{language}/agent-sdk/`). Agent
 > **Note:** For Java, Go, Ruby, C#, PHP, and cURL — these have a single file each covering all basics. Read that file plus `shared/tool-use-concepts.md` and `shared/error-codes.md` as needed.
 
 > **Note:** For the Managed Agents file reference, see the `## Managed Agents (Beta)` section above — it lists every `shared/managed-agents-*.md` file and the language-specific READMEs.
->>>>>>> upstream/main
 
-______________________________________________________________________
+---
 
 ## When to Use WebFetch
 

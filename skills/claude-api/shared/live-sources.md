@@ -24,13 +24,8 @@ This file contains WebFetch URLs for fetching current information from platform.
 | Topic             | URL                                                                          | Extraction Prompt                                                                      |
 | ----------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Extended Thinking | `https://platform.claude.com/docs/en/build-with-claude/extended-thinking.md` | "Extract extended thinking parameters, budget_tokens requirements, and usage examples" |
-<<<<<<< HEAD
-| Adaptive Thinking | `https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking.md` | "Extract adaptive thinking setup, effort levels, and Claude Opus 4.6 usage examples"   |
-| Effort Parameter  | `https://platform.claude.com/docs/en/build-with-claude/effort.md`            | "Extract effort levels, cost-quality tradeoffs, and interaction with thinking"         |
-=======
 | Adaptive Thinking | `https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking.md` | "Extract adaptive thinking setup, effort levels, and Claude Opus 4.7 usage examples"         |
 | Effort Parameter  | `https://platform.claude.com/docs/en/build-with-claude/effort.md`            | "Extract effort levels, cost-quality tradeoffs, and interaction with thinking"        |
->>>>>>> upstream/main
 | Tool Use          | `https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview.md`  | "Extract tool definition schema, tool_choice options, and handling tool results"       |
 | Streaming         | `https://platform.claude.com/docs/en/build-with-claude/streaming.md`         | "Extract streaming event types, SDK examples, and best practices"                      |
 | Prompt Caching    | `https://platform.claude.com/docs/en/build-with-claude/prompt-caching.md`    | "Extract cache_control usage, pricing benefits, and implementation examples"           |
@@ -67,62 +62,6 @@ This file contains WebFetch URLs for fetching current information from platform.
 
 ### Advanced Features
 
-<<<<<<< HEAD
-| Topic              | URL                                                                           | Extraction Prompt                                                         |
-| ------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Structured Outputs | `https://platform.claude.com/docs/en/build-with-claude/structured-outputs.md` | "Extract output_config.format usage and schema enforcement"               |
-| Compaction         | `https://platform.claude.com/docs/en/build-with-claude/compaction.md`         | "Extract compaction setup, trigger config, and streaming with compaction" |
-| Citations          | `https://platform.claude.com/docs/en/build-with-claude/citations.md`          | "Extract citation format and implementation"                              |
-| Context Windows    | `https://platform.claude.com/docs/en/build-with-claude/context-windows.md`    | "Extract context window sizes and token management"                       |
-
-______________________________________________________________________
-
-## Claude API SDK Repositories
-
-| SDK        | URL                                                      | Description                    |
-| ---------- | -------------------------------------------------------- | ------------------------------ |
-| Python     | `https://github.com/anthropics/anthropic-sdk-python`     | `anthropic` pip package source |
-| TypeScript | `https://github.com/anthropics/anthropic-sdk-typescript` | `@anthropic-ai/sdk` npm source |
-| Java       | `https://github.com/anthropics/anthropic-sdk-java`       | `anthropic-java` Maven source  |
-| Go         | `https://github.com/anthropics/anthropic-sdk-go`         | Go module source               |
-| Ruby       | `https://github.com/anthropics/anthropic-sdk-ruby`       | `anthropic` gem source         |
-| C#         | `https://github.com/anthropics/anthropic-sdk-csharp`     | NuGet package source           |
-| PHP        | `https://github.com/anthropics/anthropic-sdk-php`        | Composer package source        |
-
-______________________________________________________________________
-
-## Agent SDK Documentation URLs
-
-### Core Documentation
-
-| Topic                | URL                                                         | Extraction Prompt                                               |
-| -------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- |
-| Agent SDK Overview   | `https://platform.claude.com/docs/en/agent-sdk.md`          | "Extract the Agent SDK overview, key features, and use cases"   |
-| Agent SDK Python     | `https://github.com/anthropics/claude-agent-sdk-python`     | "Extract Python SDK installation, imports, and basic usage"     |
-| Agent SDK TypeScript | `https://github.com/anthropics/claude-agent-sdk-typescript` | "Extract TypeScript SDK installation, imports, and basic usage" |
-
-### SDK Reference (GitHub READMEs)
-
-| Topic          | URL                                                                                       | Extraction Prompt                                            |
-| -------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Python SDK     | `https://raw.githubusercontent.com/anthropics/claude-agent-sdk-python/main/README.md`     | "Extract Python SDK API reference, classes, and methods"     |
-| TypeScript SDK | `https://raw.githubusercontent.com/anthropics/claude-agent-sdk-typescript/main/README.md` | "Extract TypeScript SDK API reference, types, and functions" |
-
-### npm/PyPI Packages
-
-| Package                             | URL                                                            | Description               |
-| ----------------------------------- | -------------------------------------------------------------- | ------------------------- |
-| claude-agent-sdk (Python)           | `https://pypi.org/project/claude-agent-sdk/`                   | Python package on PyPI    |
-| @anthropic-ai/claude-agent-sdk (TS) | `https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk` | TypeScript package on npm |
-
-### GitHub Repositories
-
-| Resource       | URL                                                         | Description                         |
-| -------------- | ----------------------------------------------------------- | ----------------------------------- |
-| Python SDK     | `https://github.com/anthropics/claude-agent-sdk-python`     | Python package source               |
-| TypeScript SDK | `https://github.com/anthropics/claude-agent-sdk-typescript` | TypeScript/Node.js package source   |
-| MCP Servers    | `https://github.com/modelcontextprotocol`                   | Official MCP server implementations |
-=======
 | Topic              | URL                                                                           | Extraction Prompt                                   |
 | ------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------- |
 | Structured Outputs | `https://platform.claude.com/docs/en/build-with-claude/structured-outputs.md` | "Extract output_config.format usage and schema enforcement"                           |
@@ -184,14 +123,13 @@ WebFetch these when a binding (class, method, namespace, field) isn't covered in
 | Ruby       | `https://github.com/anthropics/anthropic-sdk-ruby`       | "Extract beta managed-agents methods and parameter shapes (`client.beta.agents`, `client.beta.sessions`)"               |
 | C#         | `https://github.com/anthropics/anthropic-sdk-csharp`     | "Extract beta managed-agents classes and method signatures (NuGet package, `BetaManagedAgents*` types)"                 |
 | PHP        | `https://github.com/anthropics/anthropic-sdk-php`        | "Extract beta managed-agents classes and method signatures (`$client->beta->agents`, `BetaManagedAgents*` params)"      |
->>>>>>> upstream/main
 
-______________________________________________________________________
+---
 
 ## Fallback Strategy
 
 If WebFetch fails (network issues, URL changed):
 
 1. Use cached content from the language-specific files (note the cache date)
-1. Inform user the data may be outdated
-1. Suggest they check platform.claude.com or the GitHub repos directly
+2. Inform user the data may be outdated
+3. Suggest they check platform.claude.com or the GitHub repos directly

@@ -1,4 +1,4 @@
-# Claude API — C\#
+# Claude API — C#
 
 > **Note:** The C# SDK is the official Anthropic SDK for C#. Tool use is supported via the Messages API. A class-annotation-based tool runner is not available; use raw tool definitions with JSON schema. The SDK also supports Microsoft.Extensions.AI IChatClient integration with function invocation.
 
@@ -22,7 +22,7 @@ AnthropicClient client = new() {
 };
 ```
 
-______________________________________________________________________
+---
 
 ## Basic Message Request
 
@@ -46,7 +46,7 @@ foreach (var text in response.Content.Select(b => b.Value).OfType<TextBlock>())
 }
 ```
 
-______________________________________________________________________
+---
 
 ## Streaming
 
@@ -70,13 +70,9 @@ await foreach (RawMessageStreamEvent streamEvent in client.Messages.CreateStream
 }
 ```
 
-<<<<<<< HEAD
-______________________________________________________________________
-=======
 **`RawMessageStreamEvent` TryPick methods** (naming drops the `Message`/`Raw` prefix): `TryPickStart`, `TryPickDelta`, `TryPickStop`, `TryPickContentBlockStart`, `TryPickContentBlockDelta`, `TryPickContentBlockStop`. There is no `TryPickMessageStop` — use `TryPickStop`.
 
 ---
->>>>>>> upstream/main
 
 ## Thinking
 
