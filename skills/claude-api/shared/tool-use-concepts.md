@@ -222,6 +222,16 @@ For full documentation, use WebFetch:
 
 ---
 
+## Skills
+
+Skills package task-specific instructions that Claude loads only when relevant. Each skill is a folder containing a `SKILL.md` file. The skill's short description sits in context by default; Claude reads the full file when the current task calls for it. Use skills to keep specialized instructions out of the base system prompt without losing discoverability.
+
+For full documentation, use WebFetch:
+
+- URL: `https://platform.claude.com/docs/en/agents-and-tools/skills`
+
+---
+
 ## Tool Use Examples
 
 You can provide sample tool calls directly in your tool definitions to demonstrate usage patterns and reduce parameter errors. This helps Claude understand how to correctly format tool inputs, especially for tools with complex schemas.
@@ -241,6 +251,16 @@ For full documentation, use WebFetch:
 - URL: `https://platform.claude.com/docs/en/agents-and-tools/computer-use/overview`
 
 ______________________________________________________________________
+
+## Context Editing
+
+Context editing clears stale tool results and thinking blocks from the transcript as a long-running agent accumulates turns. Unlike compaction (which summarizes), context editing prunes — the cleared content is removed, not replaced. Use it when old tool outputs are no longer relevant and you want to keep the transcript lean without losing the conversation structure. Thresholds for what to clear are configurable.
+
+For full documentation, use WebFetch:
+
+- URL: `https://platform.claude.com/docs/en/build-with-claude/context-editing`
+
+---
 
 ## Context Editing
 
