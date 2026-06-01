@@ -109,6 +109,35 @@ for (ContentBlock block : client.messages().create(params).content()) {
 
 ---
 
+## Thinking
+
+**Adaptive thinking is the recommended mode for Claude 4.6+ models.** Claude decides dynamically when and how much to think. The builder has a direct `.thinking(ThinkingConfigAdaptive)` overload — no manual union wrapping.
+
+```java
+import com.anthropic.models.messages.ContentBlock;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import com.anthropic.models.messages.ThinkingConfigAdaptive;
+
+MessageCreateParams params = MessageCreateParams.builder()
+    .model(Model.CLAUDE_SONNET_4_6)
+    .maxTokens(16000L)
+    .thinking(ThinkingConfigAdaptive.builder().build())
+    .addUserMessage("Solve this step by step: 27 * 453")
+    .build();
+
+for (ContentBlock block : client.messages().create(params).content()) {
+    block.thinking().ifPresent(t -> System.out.println("[thinking] " + t.thinking()));
+    block.text().ifPresent(t -> System.out.println(t.text()));
+}
+```
+
+> **Deprecated:** `ThinkingConfigEnabled.builder().budgetTokens(N)` (and the `.enabledThinking(N)` shortcut) still works on Claude 4.6 but is deprecated. Use adaptive thinking above.
+
+`ContentBlock` narrowing: `.thinking()` / `.text()` return `Optional<T>` — use `.ifPresent(...)` or `.stream().flatMap(...)`. Alternative: `isThinking()` / `asThinking()` boolean+unwrap pairs (throws on wrong variant).
+
+---
+
 ## Tool Use (Beta)
 
 The Java SDK supports beta tool use with annotated classes. Tool classes implement `Supplier<String>` for automatic execution via `BetaToolRunner`.
@@ -136,7 +165,11 @@ static class GetWeather implements Supplier<String> {
 
 BetaToolRunner toolRunner = client.beta().messages().toolRunner(
     MessageCreateParams.builder()
+<<<<<<< HEAD
         .model("claude-opus-4-7")
+=======
+        .model("claude-opus-4-8")
+>>>>>>> upstream/main
         .maxTokens(16000L)
         .putAdditionalHeader("anthropic-beta", "structured-outputs-2025-11-13")
         .addTool(GetWeather.class)
@@ -164,7 +197,11 @@ import com.anthropic.models.beta.messages.ToolRunnerCreateParams;
 BetaMemoryToolHandler memoryHandler = new FileSystemMemoryToolHandler(sandboxRoot);
 
 MessageCreateParams createParams = MessageCreateParams.builder()
+<<<<<<< HEAD
     .model("claude-opus-4-7")
+=======
+    .model("claude-opus-4-8")
+>>>>>>> upstream/main
     .maxTokens(4096L)
     .addTool(BetaMemoryTool20250818.builder().build())
     .addUserMessage("Remember that my favorite color is blue")
