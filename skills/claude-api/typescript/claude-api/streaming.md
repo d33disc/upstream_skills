@@ -4,7 +4,11 @@
 
 ```typescript
 const stream = client.messages.stream({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-4-8",
+>>>>>>> upstream/main
   max_tokens: 64000,
   messages: [{ role: "user", content: "Write a story" }],
 });
@@ -23,11 +27,19 @@ ______________________________________________________________________
 
 ## Handling Different Content Types
 
+<<<<<<< HEAD
 > **Opus 4.7 / Opus 4.6:** Use `thinking: {type: "adaptive"}`. On older models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
 
 ```typescript
 const stream = client.messages.stream({
   model: "claude-opus-4-7",
+=======
+> **Opus 4.8 / Opus 4.7 / Opus 4.6:** Use `thinking: {type: "adaptive"}`. On older models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
+
+```typescript
+const stream = client.messages.stream({
+  model: "claude-opus-4-8",
+>>>>>>> upstream/main
   max_tokens: 64000,
   thinking: { type: "adaptive" },
   messages: [{ role: "user", content: "Analyze this problem" }],
@@ -82,7 +94,11 @@ const getWeather = betaZodTool({
 });
 
 const runner = client.beta.messages.toolRunner({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-4-8",
+>>>>>>> upstream/main
   max_tokens: 64000,
   tools: [getWeather],
   messages: [
@@ -117,7 +133,11 @@ ______________________________________________________________________
 
 ```typescript
 const stream = client.messages.stream({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-4-8",
+>>>>>>> upstream/main
   max_tokens: 64000,
   messages: [{ role: "user", content: "Hello" }],
 });
