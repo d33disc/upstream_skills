@@ -80,7 +80,11 @@ ______________________________________________________________________
 - Using deprecated model ID
 - Invalid API endpoint
 
+<<<<<<< HEAD
 **Fix:** Use exact model IDs from the models documentation. You can use aliases (e.g., `claude-opus-4-7`).
+=======
+**Fix:** Use exact model IDs from the models documentation. You can use aliases (e.g., `claude-opus-4-8`).
+>>>>>>> upstream/main
 
 ______________________________________________________________________
 
@@ -105,7 +109,11 @@ Some 400 errors are specifically related to parameter validation:
 - `budget_tokens` >= `max_tokens` in extended thinking
 - Invalid tool definition schema
 
+<<<<<<< HEAD
 **Model-specific 400s on Opus 4.7:**
+=======
+**Model-specific 400s on Opus 4.8 / 4.7:**
+>>>>>>> upstream/main
 
 - `temperature`, `top_p`, `top_k` are removed — sending any of them returns 400. Delete the parameter; see `shared/model-migration.md` → Per-SDK Syntax Reference.
 - `thinking: {type: "enabled", budget_tokens: N}` is removed — sending it returns 400. Use `thinking: {type: "adaptive"}` instead.
@@ -166,10 +174,17 @@ ______________________________________________________________________
 
 | Mistake                         | Error            | Fix                                                     |
 | ------------------------------- | ---------------- | ------------------------------------------------------- |
+<<<<<<< HEAD
 | `temperature`/`top_p`/`top_k` on Opus 4.7 | 400    | Remove the parameter (see `shared/model-migration.md`)  |
 | `budget_tokens` on Opus 4.7     | 400              | Use `thinking: {type: "adaptive"}`                      |
 | `budget_tokens` >= `max_tokens` (older models) | 400 | Ensure `budget_tokens` < `max_tokens`                  |
 | Typo in model ID                | 404              | Use valid model ID like `claude-opus-4-7`               |
+=======
+| `temperature`/`top_p`/`top_k` on Opus 4.8 / 4.7 | 400 | Remove the parameter (see `shared/model-migration.md`)  |
+| `budget_tokens` on Opus 4.8 / 4.7 | 400            | Use `thinking: {type: "adaptive"}`                      |
+| `budget_tokens` >= `max_tokens` (older models) | 400 | Ensure `budget_tokens` < `max_tokens`                  |
+| Typo in model ID                | 404              | Use valid model ID like `claude-opus-4-8`               |
+>>>>>>> upstream/main
 | First message is `assistant`    | 400              | First message must be `user`                            |
 | Consecutive same-role messages  | 400              | Alternate `user` and `assistant`                        |
 | API key in code                 | 401 (leaked key) | Use environment variable                                |
