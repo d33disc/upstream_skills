@@ -96,7 +96,11 @@ Key fields returned by the API:
 const agent = await client.beta.agents.create(
   {
     name: "Coding Assistant",
+<<<<<<< HEAD
     model: "claude-opus-4-7",
+=======
+    model: "claude-opus-4-8",
+>>>>>>> upstream/main
     system: "You are a helpful coding agent.",
     tools: [{ type: "agent_toolset_20260401"}],
   },
