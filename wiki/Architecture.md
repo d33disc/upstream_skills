@@ -28,7 +28,6 @@ upstream_skills/
 │   ├── pdf/
 │   ├── pptx/
 │   ├── skill-creator/
-│   ├── slack-gif-creator/
 │   ├── theme-factory/
 │   ├── web-artifacts-builder/
 │   ├── webapp-testing/
@@ -195,7 +194,7 @@ my-skill/
 
 A Python or JavaScript library is packaged with the skill and called by Claude to produce runnable output.
 
-**Examples:** `slack-gif-creator`, `web-artifacts-builder`, `webapp-testing`
+**Examples:** `web-artifacts-builder`, `webapp-testing`
 
 ______________________________________________________________________
 
@@ -289,7 +288,7 @@ ______________________________________________________________________
 
 | Skill group                                                                                                                                                                                                                                   | License                                                           |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `algorithmic-art`, `brand-guidelines`, `canvas-design`, `claude-api`, `doc-coauthoring`, `frontend-design`, `internal-comms`, `mcp-builder`, `skill-creator`, `slack-gif-creator`, `theme-factory`, `web-artifacts-builder`, `webapp-testing` | Apache 2.0                                                        |
+| `algorithmic-art`, `brand-guidelines`, `canvas-design`, `claude-api`, `doc-coauthoring`, `frontend-design`, `internal-comms`, `mcp-builder`, `skill-creator`, `theme-factory`, `web-artifacts-builder`, `webapp-testing`                  | Apache 2.0                                                        |
 | `docx`, `pdf`, `pptx`, `xlsx`                                                                                                                                                                                                                 | Proprietary (source-available) — see `LICENSE.txt` in each folder |
 
 ______________________________________________________________________

@@ -53,7 +53,6 @@ SKILL_CATEGORIES: dict[str, str] = {
     "brand-guidelines": "Creative & Design",
     "canvas-design": "Creative & Design",
     "frontend-design": "Creative & Design",
-    "slack-gif-creator": "Creative & Design",
     "theme-factory": "Creative & Design",
     "claude-api": "Development & Technical",
     "mcp-builder": "Development & Technical",
@@ -408,7 +407,7 @@ def generate_skills_overview(skills: list[Skill], timestamp: str) -> str:
         "| `document-skills` | docx, pdf, pptx, xlsx |",
         "| `example-skills` | algorithmic-art, brand-guidelines, canvas-design, "
         "doc-coauthoring, frontend-design, internal-comms, mcp-builder, "
-        "skill-creator, slack-gif-creator, theme-factory, web-artifacts-builder, webapp-testing |",
+        "skill-creator, theme-factory, web-artifacts-builder, webapp-testing |",
         "| `claude-api` | claude-api |",
         "",
         "```",

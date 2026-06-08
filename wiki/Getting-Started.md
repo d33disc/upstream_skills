@@ -10,7 +10,7 @@ No prerequisites are needed to use skills that are **pure instructions** (no scr
 
 | Dependency    | Required by                                                             | Install                                                 |
 | ------------- | ----------------------------------------------------------------------- | ------------------------------------------------------- |
-| Python 3.8+   | docx, pdf, pptx, xlsx, skill-creator, webapp-testing, slack-gif-creator | System package manager                                  |
+| Python 3.8+   | docx, pdf, pptx, xlsx, skill-creator, webapp-testing                    | System package manager                                  |
 | Node.js & npm | web-artifacts-builder, docx (JS library)                                | <https://nodejs.org>                                    |
 | LibreOffice   | docx, pptx, xlsx (format conversion)                                    | `sudo apt install libreoffice`                          |
 | Poppler utils | pdf, pptx (PDF → image)                                                 | `sudo apt install poppler-utils`                        |
@@ -42,7 +42,7 @@ Claude Code is the recommended environment for local development workflows that 
 | Plugin group      | Skills included                                                                                                                                                                                         |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `document-skills` | docx, pdf, pptx, xlsx                                                                                                                                                                                   |
-| `example-skills`  | algorithmic-art, brand-guidelines, canvas-design, doc-coauthoring, frontend-design, internal-comms, mcp-builder, skill-creator, slack-gif-creator, theme-factory, web-artifacts-builder, webapp-testing |
+| `example-skills`  | algorithmic-art, brand-guidelines, canvas-design, doc-coauthoring, frontend-design, internal-comms, mcp-builder, skill-creator, theme-factory, web-artifacts-builder, webapp-testing                    |
 | `claude-api`      | claude-api                                                                                                                                                                                              |
 
 ### 3 — Use a skill
@@ -173,22 +173,6 @@ bash skills/web-artifacts-builder/scripts/bundle-artifact.sh
 python skills/webapp-testing/scripts/with_server.py \
   --server "npm run dev" --port 5173 \
   -- python my_automation.py
-```
-
-### Slack GIF creator (standalone)
-
-```python
-from skills.slack_gif_creator.core.gif_builder import GIFBuilder
-from PIL import Image, ImageDraw
-
-builder = GIFBuilder(width=128, height=128, fps=10)
-for i in range(12):
-    frame = Image.new("RGB", (128, 128), (240, 248, 255))
-    draw = ImageDraw.Draw(frame)
-    draw.ellipse([(i * 8, i * 8), (64 + i * 4, 64 + i * 4)], fill=(70, 130, 180))
-    builder.add_frame(frame)
-
-builder.save("output.gif", num_colors=48, optimize_for_emoji=True)
 ```
 
 ______________________________________________________________________

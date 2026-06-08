@@ -21,3 +21,6 @@ devtu-*
 setup-tooluniverse
 create-tooluniverse-skill
 README.md
+
+# Removed-by-decision skills — block future upstream syncs from re-adding
+slack-gif-creator
