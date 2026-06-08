@@ -62,6 +62,19 @@ rescheduling → running ↔ idle → terminated
 | Archive | Session becomes **read-only**. Not reversible. |
 | Delete | Permanently deletes session, event history, container, and checkpoints. |
 
+<<<<<<< HEAD
+=======
+These are ops/inspection calls — typically made from a terminal, not application code. From the shell (see `shared/anthropic-cli.md`):
+
+```sh
+ant beta:sessions list --transform '{id,title,status,created_at}' --format jsonl
+ant beta:sessions retrieve --session-id "$SID"
+ant beta:sessions:events stream --session-id "$SID"   # watch events live
+ant beta:sessions archive  --session-id "$SID"
+ant beta:sessions delete   --session-id "$SID"
+```
+
+>>>>>>> upstream/main
 ---
 
 ## Sessions
@@ -96,7 +109,11 @@ Key fields returned by the API:
 const agent = await client.beta.agents.create(
   {
     name: "Coding Assistant",
+<<<<<<< HEAD
     model: "claude-opus-4-7",
+=======
+    model: "claude-opus-4-8",
+>>>>>>> upstream/main
     system: "You are a helpful coding agent.",
     tools: [{ type: "agent_toolset_20260401"}],
   },
@@ -112,6 +129,11 @@ const session = await client.beta.sessions.create(
 );
 ```
 
+<<<<<<< HEAD
+=======
+> 💡 **Watch it live in Console.** While developing, print a link so you can click through to the session UI instead of parsing the event stream: `https://platform.claude.com/workspaces/{workspace}/sessions/{session.id}`. Use `default` for the workspace slug unless you created the session in a non-default workspace; the sessions list for your workspace is at `https://platform.claude.com/workspaces/default/sessions`. Include this `print`/`console.log` in code you generate for users who are iterating locally.
+
+>>>>>>> upstream/main
 **Session creation parameters:**
 
 | Field           | Type     | Required | Description                                    |
@@ -173,6 +195,11 @@ The agent is a **persistent resource**, not a per-run parameter. The intended pa
 
 **Anti-pattern:** calling `agents.create()` at the top of every script run. This accumulates orphaned agent objects, pays create latency on every invocation, and defeats the versioning model. If you see `agents.create()` in a function that's called per-request or per-cron-tick, that's wrong — hoist it to one-time setup and persist the ID.
 
+<<<<<<< HEAD
+=======
+> **Recommended — define agents and environments as YAML + apply via the `ant` CLI.** The split is **CLI for the control plane, SDK for the data plane**: agents and environments are relatively static resources you manage with `ant` (version-controlled YAML, applied from CI); sessions are dynamic and driven by your application through the SDK. See `shared/anthropic-cli.md` → *Version-controlled Managed Agents resources* for the `ant beta:agents create < agent.yaml` / `update --version N` flow. The SDK `agents.create()` call shown elsewhere in this doc is the in-code equivalent — use it when you need to provision programmatically, but prefer the YAML flow for anything a human maintains.
+
+>>>>>>> upstream/main
 ### Versioning
 
 Each `POST /v1/agents/{id}` (update) creates a new immutable version (numeric timestamp, e.g. `1772585501101368014`). The agent's history is append-only — you can't edit a past version.
