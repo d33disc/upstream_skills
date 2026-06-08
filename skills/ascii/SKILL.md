@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## name: ascii description: > Scan a codebase and generate ASCII architecture diagrams using Unicode box-drawing glyphs. Use when the user says /ascii, "diagram the codebase", "draw architecture", "map the system", "show data flow", "visualize the code", "network diagram", or any request to create text-based diagrams of code structure, workflows, or system architecture. Also triggers on: pasting code and asking to "draw this", understanding how modules connect, or requesting a visual overview. Do NOT use for: image generation, Mermaid/PlantUML output, or non-codebase diagramming (org charts, business processes without code)
+---
+name: ascii
+description: "Scan a codebase and generate ASCII architecture diagrams using Unicode box-drawing glyphs. Use when the user says /ascii, \"diagram the codebase\", \"draw architecture\", \"map the system\", \"show data flow\", \"visualize the code\", \"network diagram\", or any request to create text-based diagrams of code structure, workflows, or system architecture. Also triggers on: pasting code and asking to \"draw this\", understanding how modules connect, or requesting a visual overview. Do NOT use for: image generation, Mermaid/PlantUML output, or non-codebase diagramming (org charts, business processes without code)"
+---
 
 # ASCII Architecture Diagrams
 
