@@ -35,7 +35,7 @@ Each tool requires a name, description, and JSON Schema for its inputs:
 **Best practices for tool definitions:**
 
 - Use clear, descriptive names (e.g., `get_weather`, `search_database`, `send_email`)
-- Write detailed descriptions — Claude uses these to decide when to use the tool
+- Write detailed descriptions — Claude uses these to decide when to use the tool. Be **prescriptive about *when* to call it**, not just what it does (e.g. "Call this when the user asks about current prices or recent events"). On recent Opus models, which reach for tools more conservatively, trigger conditions in the description give measurable lift in should-call rate.
 - Include descriptions for each property
 - Use `enum` for parameters with a fixed set of values
 - Mark truly required parameters in `required`; make others optional with defaults
@@ -74,7 +74,11 @@ if response.stop_reason == "pause_turn":
     ]
     # Make another API request — server resumes automatically
     response = client.messages.create(
+<<<<<<< HEAD
         model="claude-opus-4-7", messages=messages, tools=tools
+=======
+        model="claude-opus-4-8", messages=messages, tools=tools
+>>>>>>> upstream/main
     )
 ```
 
@@ -171,7 +175,11 @@ Web search and web fetch let Claude search the web and retrieve page content. Th
 ]
 ```
 
+<<<<<<< HEAD
 ### Dynamic Filtering (Opus 4.7 / Opus 4.6 / Sonnet 4.6)
+=======
+### Dynamic Filtering (Opus 4.8 / Opus 4.7 / Opus 4.6 / Sonnet 4.6)
+>>>>>>> upstream/main
 
 The `web_search_20260209` and `web_fetch_20260209` versions support **dynamic filtering** — Claude writes and executes code to filter search results before they reach the context window, improving accuracy and token efficiency. Dynamic filtering is built into these tool versions and activates automatically; you do not need to separately declare the `code_execution` tool or pass any beta header.
 
@@ -222,6 +230,16 @@ For full documentation, use WebFetch:
 
 ---
 
+## Skills
+
+Skills package task-specific instructions that Claude loads only when relevant. Each skill is a folder containing a `SKILL.md` file. The skill's short description sits in context by default; Claude reads the full file when the current task calls for it. Use skills to keep specialized instructions out of the base system prompt without losing discoverability.
+
+For full documentation, use WebFetch:
+
+- URL: `https://platform.claude.com/docs/en/agents-and-tools/skills`
+
+---
+
 ## Tool Use Examples
 
 You can provide sample tool calls directly in your tool definitions to demonstrate usage patterns and reduce parameter errors. This helps Claude understand how to correctly format tool inputs, especially for tools with complex schemas.
@@ -249,6 +267,36 @@ Context editing clears stale tool results and thinking blocks from the transcrip
 For full documentation, use WebFetch:
 
 - URL: `https://platform.claude.com/docs/en/build-with-claude/context-editing`
+
+---
+
+## Context Editing
+
+Context editing clears stale tool results and thinking blocks from the transcript as a long-running agent accumulates turns. Unlike compaction (which summarizes), context editing prunes — the cleared content is removed, not replaced. Use it when old tool outputs are no longer relevant and you want to keep the transcript lean without losing the conversation structure. Thresholds for what to clear are configurable.
+
+For full documentation, use WebFetch:
+
+- URL: `https://platform.claude.com/docs/en/build-with-claude/context-editing`
+
+---
+
+## Server-Side Tools: Advisor (Beta)
+
+The advisor tool lets Claude consult a secondary model during a conversation. The advisor runs its own API call with a model you specify and returns its analysis to the primary model. Use it when you want a second opinion, specialized expertise, or cross-model verification without managing the orchestration yourself.
+
+### Tool Definition
+
+```json
+{
+  "type": "advisor_20260301",
+  "name": "advisor",
+  "model": "claude-sonnet-4-6"
+}
+```
+
+The `model` parameter is required — it specifies which model the advisor uses for its own inference. Optional fields: `caching`, `max_uses`, `allowed_callers`, `defer_loading`, `strict`.
+
+**Beta header required:** `advisor-tool-2026-03-01`. The SDK sets this automatically when using `client.beta.messages.create()` with advisor tools.
 
 ---
 
@@ -280,7 +328,11 @@ Two features are available:
 - **JSON outputs** (`output_config.format`): Control Claude's response format
 - **Strict tool use** (`strict: true`): Guarantee valid tool parameter schemas
 
+<<<<<<< HEAD
 **Supported models:** Claude Opus 4.7, Claude Sonnet 4.6, and Claude Haiku 4.5. Legacy models (Claude Opus 4.5, Claude Opus 4.1) also support structured outputs.
+=======
+**Supported models:** Claude Opus 4.8, Claude Sonnet 4.6, and Claude Haiku 4.5. Legacy models (Claude Opus 4.5, Claude Opus 4.1) also support structured outputs.
+>>>>>>> upstream/main
 
 > **Recommended:** Use `client.messages.parse()` which automatically validates responses against your schema. When using `messages.create()` directly, use `output_config: {format: {...}}`. The `output_format` convenience parameter is also accepted by some SDK methods (e.g., `.parse()`), but `output_config.format` is the canonical API-level parameter.
 

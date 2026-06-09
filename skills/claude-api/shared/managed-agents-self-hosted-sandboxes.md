@@ -78,7 +78,11 @@ await new EnvironmentWorker({
 
 ## Run a worker — `ant` CLI (fixed tools)
 
+<<<<<<< HEAD
 The `ant` CLI ships a worker with the fixed built-in toolset (`bash`, `read`, `write`, `edit`, `glob`, `grep`). Install per the Anthropic CLI docs (see `shared/live-sources.md` → Anthropic CLI), then:
+=======
+The `ant` CLI ships a worker with the fixed built-in toolset (`bash`, `read`, `write`, `edit`, `glob`, `grep`). Install per `shared/anthropic-cli.md`, then:
+>>>>>>> upstream/main
 
 ```sh
 export ANTHROPIC_ENVIRONMENT_KEY=sk-ant-oat01-...

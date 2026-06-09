@@ -40,7 +40,11 @@ All resources are under the `beta` namespace. Python and TypeScript share identi
 
 **Agent shorthand:** `agent` on session create accepts either a bare string (`agent="agent_abc123"` — uses latest version) or the full reference object (`{type: "agent", id: "agent_abc123", version: 123}`).
 
+<<<<<<< HEAD
 **Model shorthand:** `model` on agent create accepts either a bare string (`model="claude-opus-4-7"` — uses `standard` speed) or the full config object (`{id: "claude-opus-4-6", speed: "fast"}`). Note: `speed: "fast"` is only supported on Opus 4.6.
+=======
+**Model shorthand:** `model` on agent create accepts either a bare string (`model="claude-opus-4-8"` — uses `standard` speed) or the full config object (`{id: "claude-opus-4-6", speed: "fast"}`). Note: `speed: "fast"` is only supported on Opus 4.6.
+>>>>>>> upstream/main
 
 ---
 
@@ -209,7 +213,11 @@ Immutable per-mutation snapshots (`memver_...`) — the audit and rollback surfa
 ```json
 {
   "name": "string (required, 1-256 chars)",
+<<<<<<< HEAD
   "model": "claude-opus-4-7 (required — bare string, or {id, speed} object)",
+=======
+  "model": "claude-opus-4-8 (required — bare string, or {id, speed} object)",
+>>>>>>> upstream/main
   "description": "string (optional, up to 2048 chars)",
   "system": "string (optional, up to 100,000 chars)",
   "tools": [
@@ -369,7 +377,11 @@ Managed Agents endpoints have per-organization request-per-minute (RPM) limits, 
 
 | Endpoint group | Scope | RPM | Max concurrent |
 |---|---|---|---|
+<<<<<<< HEAD
 | Create operations (Agents, Sessions, Vaults) | organization | 60 | — |
+=======
+| Create operations (Agents, Sessions, Vaults) | organization | 300 | — |
+>>>>>>> upstream/main
 | All other operations (Agents, Sessions, Vaults) | organization | 600 | — |
 | All operations (Environments) | organization | 60 | 5 |
 
