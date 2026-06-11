@@ -15,10 +15,19 @@ pip install anthropic
 ```python
 import anthropic
 
+<<<<<<< HEAD
 # Default (uses ANTHROPIC_API_KEY env var)
 client = anthropic.Anthropic()
 
 # Explicit API key
+=======
+# Default — resolves credentials from the environment:
+# ANTHROPIC_API_KEY, or ANTHROPIC_AUTH_TOKEN, or an `ant auth login` profile.
+# Prefer this for local dev; don't hardcode a key.
+client = anthropic.Anthropic()
+
+# Explicit API key (only when you must inject a specific key)
+>>>>>>> upstream/main
 client = anthropic.Anthropic(api_key="your-api-key")
 ```
 
@@ -49,7 +58,11 @@ print(environment.id)  # env_...
 # 1. Create the agent (reusable, versioned)
 agent = client.beta.agents.create(
     name="Coding Assistant",
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     tools=[{"type": "agent_toolset_20260401", "default_config": {"enabled": True}}],
 )
 
@@ -68,7 +81,11 @@ import os
 
 agent = client.beta.agents.create(
     name="Code Reviewer",
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     system="You are a senior code reviewer.",
     tools=[
         {"type": "agent_toolset_20260401"},
@@ -129,7 +146,11 @@ client.beta.sessions.events.send(
 import json
 
 # Stream-first: open stream, then send while stream is live
+<<<<<<< HEAD
 with client.beta.sessions.stream(
+=======
+with client.beta.sessions.events.stream(
+>>>>>>> upstream/main
     session_id=session.id,
 ) as stream:
     client.beta.sessions.events.send(
@@ -140,7 +161,11 @@ with client.beta.sessions.stream(
         ...  # process events
 
 # Standalone stream iteration:
+<<<<<<< HEAD
 with client.beta.sessions.stream(
+=======
+with client.beta.sessions.events.stream(
+>>>>>>> upstream/main
     session_id=session.id,
 ) as stream:
     for event in stream:
@@ -150,7 +175,11 @@ with client.beta.sessions.stream(
                     print(block.text, end="", flush=True)
         elif event.type == "agent.custom_tool_use":
             # Custom tool invocation — session is now idle
+<<<<<<< HEAD
             print(f"\nCustom tool call: {event.tool_name}")
+=======
+            print(f"\nCustom tool call: {event.name}")
+>>>>>>> upstream/main
             print(f"Input: {json.dumps(event.input)}")
             # Send result back (see below)
         elif event.type == "session.status_idle":
@@ -210,7 +239,11 @@ def run_custom_tool(tool_name: str, tool_input: dict) -> str:
 def run_session(client, session_id: str):
     """Stream events and handle custom tool calls."""
     while True:
+<<<<<<< HEAD
         with client.beta.sessions.stream(
+=======
+        with client.beta.sessions.events.stream(
+>>>>>>> upstream/main
             session_id=session_id,
         ) as stream:
             tool_calls = []
@@ -232,7 +265,11 @@ def run_session(client, session_id: str):
         # Process custom tool calls
         results = []
         for call in tool_calls:
+<<<<<<< HEAD
             result = run_custom_tool(call.tool_name, call.input)
+=======
+            result = run_custom_tool(call.name, call.input)
+>>>>>>> upstream/main
             results.append({
                 "type": "user.custom_tool_result",
                 "custom_tool_use_id": call.id,
@@ -311,7 +348,11 @@ client.beta.sessions.archive(session_id="sesn_011CZxAbc123Def456")
 # Agent declares MCP server (no auth here — auth goes in a vault)
 agent = client.beta.agents.create(
     name="MCP Agent",
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     mcp_servers=[
         {"type": "url", "name": "my-tools", "url": "https://my-mcp-server.example.com/sse"},
     ],
