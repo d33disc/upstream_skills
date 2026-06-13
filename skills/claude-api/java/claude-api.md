@@ -10,14 +10,22 @@ Maven:
 <dependency>
     <groupId>com.anthropic</groupId>
     <artifactId>anthropic-java</artifactId>
+<<<<<<< HEAD
     <version>2.17.0</version>
+=======
+    <version>2.34.0</version>
+>>>>>>> upstream/main
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
+<<<<<<< HEAD
 implementation("com.anthropic:anthropic-java:2.17.0")
+=======
+implementation("com.anthropic:anthropic-java:2.34.0")
+>>>>>>> upstream/main
 ```
 
 ## Client Initialization
@@ -109,6 +117,35 @@ for (ContentBlock block : client.messages().create(params).content()) {
 
 ---
 
+## Thinking
+
+**Adaptive thinking is the recommended mode for Claude 4.6+ models.** Claude decides dynamically when and how much to think. The builder has a direct `.thinking(ThinkingConfigAdaptive)` overload — no manual union wrapping.
+
+```java
+import com.anthropic.models.messages.ContentBlock;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
+import com.anthropic.models.messages.ThinkingConfigAdaptive;
+
+MessageCreateParams params = MessageCreateParams.builder()
+    .model(Model.CLAUDE_SONNET_4_6)
+    .maxTokens(16000L)
+    .thinking(ThinkingConfigAdaptive.builder().build())
+    .addUserMessage("Solve this step by step: 27 * 453")
+    .build();
+
+for (ContentBlock block : client.messages().create(params).content()) {
+    block.thinking().ifPresent(t -> System.out.println("[thinking] " + t.thinking()));
+    block.text().ifPresent(t -> System.out.println(t.text()));
+}
+```
+
+> **Deprecated:** `ThinkingConfigEnabled.builder().budgetTokens(N)` (and the `.enabledThinking(N)` shortcut) still works on Claude 4.6 but is deprecated. Use adaptive thinking above.
+
+`ContentBlock` narrowing: `.thinking()` / `.text()` return `Optional<T>` — use `.ifPresent(...)` or `.stream().flatMap(...)`. Alternative: `isThinking()` / `asThinking()` boolean+unwrap pairs (throws on wrong variant).
+
+---
+
 ## Tool Use (Beta)
 
 The Java SDK supports beta tool use with annotated classes. Tool classes implement `Supplier<String>` for automatic execution via `BetaToolRunner`.
@@ -136,7 +173,11 @@ static class GetWeather implements Supplier<String> {
 
 BetaToolRunner toolRunner = client.beta().messages().toolRunner(
     MessageCreateParams.builder()
+<<<<<<< HEAD
         .model("claude-opus-4-7")
+=======
+        .model("claude-opus-4-8")
+>>>>>>> upstream/main
         .maxTokens(16000L)
         .putAdditionalHeader("anthropic-beta", "structured-outputs-2025-11-13")
         .addTool(GetWeather.class)
@@ -164,7 +205,11 @@ import com.anthropic.models.beta.messages.ToolRunnerCreateParams;
 BetaMemoryToolHandler memoryHandler = new FileSystemMemoryToolHandler(sandboxRoot);
 
 MessageCreateParams createParams = MessageCreateParams.builder()
+<<<<<<< HEAD
     .model("claude-opus-4-7")
+=======
+    .model("claude-opus-4-8")
+>>>>>>> upstream/main
     .maxTokens(4096L)
     .addTool(BetaMemoryTool20250818.builder().build())
     .addUserMessage("Remember that my favorite color is blue")
@@ -359,7 +404,11 @@ import com.anthropic.models.messages.CodeExecutionTool20260120;
 .addTool(CodeExecutionTool20260120.builder().build())
 ```
 
+<<<<<<< HEAD
 Also available: `WebFetchTool20260209`, `MemoryTool20250818`, `ToolSearchToolBm25_20251119`.
+=======
+Also available: `WebFetchTool20260209`, `MemoryTool20250818`, `ToolSearchToolBm25_20251119`. For the advisor tool, use `BetaAdvisorTool20260301` in the beta namespace.
+>>>>>>> upstream/main
 
 ### Beta namespace (MCP, compaction)
 
@@ -408,6 +457,38 @@ for (ContentBlock block : response.content()) {
 
 ---
 
+<<<<<<< HEAD
+=======
+## Stop Details
+
+When `stopReason()` is `"refusal"`, the response includes structured `stopDetails()`:
+
+```java
+response.stopDetails().ifPresent(details -> {
+    System.out.println("Category: " + details.category());
+    System.out.println("Explanation: " + details.explanation());
+});
+```
+
+---
+
+## Error Type
+
+`AnthropicServiceException` exposes `.errorType()` returning `Optional<ErrorType>` for programmatic error classification:
+
+```java
+try {
+    client.messages().create(params);
+} catch (AnthropicServiceException e) {
+    e.errorType().ifPresent(type ->
+        System.out.println("Error type: " + type)  // RATE_LIMIT_ERROR, OVERLOADED_ERROR, etc.
+    );
+}
+```
+
+---
+
+>>>>>>> upstream/main
 ## Files API (Beta)
 
 Under `client.beta().files()`. File references in messages need the beta message types (non-beta `DocumentBlockParam.Source` has no file-ID variant).
