@@ -41,7 +41,11 @@ ______________________________________________________________________
 
 ```typescript
 const response = await client.beta.messages.create({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-4-8",
+>>>>>>> upstream/main
   max_tokens: 16000,
   messages: [
     {
