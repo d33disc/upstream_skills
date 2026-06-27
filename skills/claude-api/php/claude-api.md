@@ -56,7 +56,11 @@ ______________________________________________________________________
 
 ```php
 $message = $client->messages->create(
+<<<<<<< HEAD
     model: 'claude-opus-4-7',
+=======
+    model: 'claude-opus-4-8',
+>>>>>>> upstream/main
     maxTokens: 16000,
     messages: [
         ['role' => 'user', 'content' => 'What is the capital of France?'],
@@ -72,6 +76,20 @@ foreach ($message->content as $block) {
         echo $block->text;
     }
 }
+<<<<<<< HEAD
+=======
+```
+
+If you only want the first text block:
+
+```php
+foreach ($message->content as $block) {
+    if ($block->type === 'text') {
+        echo $block->text;
+        break;
+    }
+}
+>>>>>>> upstream/main
 ```
 
 If you only want the first text block:
@@ -96,7 +114,11 @@ use Anthropic\Messages\RawContentBlockDeltaEvent;
 use Anthropic\Messages\TextDelta;
 
 $stream = $client->messages->createStream(
+<<<<<<< HEAD
     model: 'claude-opus-4-7',
+=======
+    model: 'claude-opus-4-8',
+>>>>>>> upstream/main
     maxTokens: 64000,
     messages: [
         ['role' => 'user', 'content' => 'Write a haiku'],
@@ -107,6 +129,7 @@ foreach ($stream as $event) {
     if ($event instanceof RawContentBlockDeltaEvent && $event->delta instanceof TextDelta) {
         echo $event->delta->text;
     }
+<<<<<<< HEAD
 }
 ```
 
@@ -346,6 +369,251 @@ foreach ($message->content as $block) {
         $data = json_decode($block->text, true);
         break;
     }
+=======
+>>>>>>> upstream/main
+}
+```
+
+---
+
+<<<<<<< HEAD
+## Beta Features & Server-Side Tools
+
+=======
+## Tool Use
+
+### Tool Runner (Beta)
+
+**Beta:** The PHP SDK provides a tool runner via `$client->beta->messages->toolRunner()`. Define tools with `BetaRunnableTool` — a definition array plus a `run` closure:
+
+```php
+use Anthropic\Lib\Tools\BetaRunnableTool;
+
+$weatherTool = new BetaRunnableTool(
+    definition: [
+        'name' => 'get_weather',
+        'description' => 'Get the current weather for a location.',
+        'input_schema' => [
+            'type' => 'object',
+            'properties' => [
+                'location' => ['type' => 'string', 'description' => 'City and state'],
+            ],
+            'required' => ['location'],
+        ],
+    ],
+    run: function (array $input): string {
+        return "The weather in {$input['location']} is sunny and 72°F.";
+    },
+);
+
+$runner = $client->beta->messages->toolRunner(
+    maxTokens: 16000,
+    messages: [['role' => 'user', 'content' => 'What is the weather in Paris?']],
+    model: 'claude-opus-4-8',
+    tools: [$weatherTool],
+);
+
+foreach ($runner as $message) {
+    foreach ($message->content as $block) {
+        if ($block->type === 'text') {
+            echo $block->text;
+        }
+    }
+}
+```
+
+### Manual Loop
+
+Tools are passed as arrays. **The SDK uses camelCase keys** (`inputSchema`, `toolUseID`, `stopReason`) and auto-maps to the API's snake_case on the wire — since v0.5.0. See [shared tool use concepts](../shared/tool-use-concepts.md) for the loop pattern.
+
+```php
+use Anthropic\Messages\ToolUseBlock;
+
+$tools = [
+    [
+        'name' => 'get_weather',
+        'description' => 'Get the current weather in a given location',
+        'inputSchema' => [  // camelCase, not input_schema
+            'type' => 'object',
+            'properties' => [
+                'location' => ['type' => 'string', 'description' => 'City and state'],
+            ],
+            'required' => ['location'],
+        ],
+    ],
+];
+
+$messages = [['role' => 'user', 'content' => 'What is the weather in SF?']];
+
+$response = $client->messages->create(
+    model: 'claude-opus-4-8',
+    maxTokens: 16000,
+    tools: $tools,
+    messages: $messages,
+);
+
+while ($response->stopReason === 'tool_use') {  // camelCase property
+    $toolResults = [];
+    foreach ($response->content as $block) {
+        if ($block instanceof ToolUseBlock) {
+            // $block->name  : string               — tool name to dispatch on
+            // $block->input : array<string,mixed>  — parsed JSON input
+            // $block->id    : string               — pass back as toolUseID
+            $result = executeYourTool($block->name, $block->input);
+            $toolResults[] = [
+                'type' => 'tool_result',
+                'toolUseID' => $block->id,  // camelCase, not tool_use_id
+                'content' => $result,
+            ];
+        }
+    }
+
+    // Append assistant turn + user turn with tool results
+    $messages[] = ['role' => 'assistant', 'content' => $response->content];
+    $messages[] = ['role' => 'user', 'content' => $toolResults];
+
+    $response = $client->messages->create(
+        model: 'claude-opus-4-8',
+        maxTokens: 16000,
+        tools: $tools,
+        messages: $messages,
+    );
+}
+
+// Final text response
+foreach ($response->content as $block) {
+    if ($block->type === 'text') {
+        echo $block->text;
+    }
+}
+```
+
+`$block->type === 'tool_use'` also works; `instanceof ToolUseBlock` narrows for PHPStan.
+
+
+---
+
+## Extended Thinking
+
+**Adaptive thinking is the recommended mode for Claude 4.6+ models.** Claude decides dynamically when and how much to think.
+
+```php
+use Anthropic\Messages\ThinkingBlock;
+
+$message = $client->messages->create(
+    model: 'claude-opus-4-8',
+    maxTokens: 16000,
+    thinking: ['type' => 'adaptive'],
+    messages: [
+        ['role' => 'user', 'content' => 'Solve: 27 * 453'],
+    ],
+);
+
+// ThinkingBlock(s) precede TextBlock in content
+foreach ($message->content as $block) {
+    if ($block instanceof ThinkingBlock) {
+        echo "Thinking:\n{$block->thinking}\n\n";
+        // $block->signature is an opaque string — preserve verbatim if
+        // passing thinking blocks back in multi-turn conversations
+    } elseif ($block->type === 'text') {
+        echo "Answer: {$block->text}\n";
+    }
+}
+```
+
+> **Deprecated:** `['type' => 'enabled', 'budgetTokens' => N]` (fixed-budget extended thinking) still works on Claude 4.6 but is deprecated. Use adaptive thinking above.
+
+`$block->type === 'thinking'` also works for the check; `instanceof` narrows for PHPStan.
+
+---
+
+## Prompt Caching
+
+`system:` takes an array of text blocks; set `cacheControl` on the last block. Array-shape syntax (camelCase keys) is idiomatic. For placement patterns and the silent-invalidator audit checklist, see `shared/prompt-caching.md`.
+
+```php
+$message = $client->messages->create(
+    model: 'claude-opus-4-8',
+    maxTokens: 16000,
+    system: [
+        ['type' => 'text', 'text' => $longSystemPrompt, 'cacheControl' => ['type' => 'ephemeral']],
+    ],
+    messages: [['role' => 'user', 'content' => 'Summarize the key points']],
+);
+```
+
+For 1-hour TTL: `'cacheControl' => ['type' => 'ephemeral', 'ttl' => '1h']`. There's also a top-level `cacheControl:` on `messages->create(...)` that auto-places on the last cacheable block.
+
+Verify hits via `$message->usage->cacheCreationInputTokens` / `$message->usage->cacheReadInputTokens`.
+
+---
+
+## Structured Outputs
+
+### Using StructuredOutputModel (Recommended)
+
+Define a PHP class implementing `StructuredOutputModel` and pass it as `outputConfig`:
+
+```php
+use Anthropic\Lib\Contracts\StructuredOutputModel;
+use Anthropic\Lib\Concerns\StructuredOutputModelTrait;
+use Anthropic\Lib\Attributes\Constrained;
+
+class Person implements StructuredOutputModel
+{
+    use StructuredOutputModelTrait;
+
+    #[Constrained(description: 'Full name')]
+    public string $name;
+
+    public int $age;
+
+    public ?string $email = null;  // nullable = optional field
+}
+
+$message = $client->messages->create(
+    model: 'claude-opus-4-8',
+    maxTokens: 16000,
+    messages: [['role' => 'user', 'content' => 'Generate a profile for Alice, age 30']],
+    outputConfig: ['format' => Person::class],
+);
+
+$person = $message->parsedOutput();  // Person instance
+echo $person->name;
+```
+
+Types are inferred from PHP type hints. Use `#[Constrained(description: '...')]` to add descriptions. Nullable properties (`?string`) become optional fields.
+
+### Raw Schema
+
+```php
+$message = $client->messages->create(
+    model: 'claude-opus-4-8',
+    maxTokens: 16000,
+    messages: [['role' => 'user', 'content' => 'Extract: John (john@co.com), Enterprise plan']],
+    outputConfig: [
+        'format' => [
+            'type' => 'json_schema',
+            'schema' => [
+                'type' => 'object',
+                'properties' => [
+                    'name' => ['type' => 'string'],
+                    'email' => ['type' => 'string'],
+                    'plan' => ['type' => 'string'],
+                ],
+                'required' => ['name', 'email', 'plan'],
+                'additionalProperties' => false,
+            ],
+        ],
+    ],
+);
+
+// First text block contains valid JSON
+foreach ($message->content as $block) {
+    if ($block->type === 'text') {
+        $data = json_decode($block->text, true);
+        break;
+    }
 }
 ```
 
@@ -353,13 +621,18 @@ foreach ($message->content as $block) {
 
 ## Beta Features & Server-Side Tools
 
+>>>>>>> upstream/main
 **`betas:` is NOT a param on `$client->messages->create()`** — it only exists on the beta namespace. Use it for features that need an explicit opt-in header:
 
 ```php
 use Anthropic\Beta\Messages\BetaRequestMCPServerURLDefinition;
 
 $response = $client->beta->messages->create(
+<<<<<<< HEAD
     model: 'claude-opus-4-7',
+=======
+    model: 'claude-opus-4-8',
+>>>>>>> upstream/main
     maxTokens: 16000,
     mcpServers: [
         BetaRequestMCPServerURLDefinition::with(
@@ -373,3 +646,33 @@ $response = $client->beta->messages->create(
 ```
 
 **Server-side tools** (bash, web_search, text_editor, code_execution) are GA and work on both paths — `Anthropic\Messages\ToolBash20250124` / `WebSearchTool20260209` / `ToolTextEditor20250728` / `CodeExecutionTool20260120` for non-beta, `Anthropic\Beta\Messages\BetaToolBash20250124` / `BetaWebSearchTool20260209` / `BetaToolTextEditor20250728` / `BetaCodeExecutionTool20260120` for beta. No `betas:` header needed for these.
+<<<<<<< HEAD
+=======
+
+---
+
+## Stop Details
+
+When `stopReason` is `'refusal'`, the response includes structured `stopDetails`:
+
+```php
+if ($message->stopReason === 'refusal' && $message->stopDetails !== null) {
+    echo "Category: " . $message->stopDetails->category . "\n";     // "cyber" | "bio" | null
+    echo "Explanation: " . $message->stopDetails->explanation . "\n";
+}
+```
+
+---
+
+## Error Type
+
+`APIStatusException` exposes a `->type` property for programmatic error classification:
+
+```php
+try {
+    $client->messages->create(...);
+} catch (\Anthropic\Core\Exceptions\APIStatusException $e) {
+    echo $e->type?->value;  // "rate_limit_error", "overloaded_error", etc.
+}
+```
+>>>>>>> upstream/main
