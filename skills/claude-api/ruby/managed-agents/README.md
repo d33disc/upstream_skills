@@ -51,7 +51,11 @@ puts "Environment ID: #{environment.id}" # env_...
 # 1. Create the agent (reusable, versioned)
 agent = client.beta.agents.create(
   name: "Coding Assistant",
+<<<<<<< HEAD
   model: :"claude-opus-4-7",
+=======
+  model: :"claude-opus-4-8",
+>>>>>>> upstream/main
   system_: "You are a helpful coding assistant.",
   tools: [{type: "agent_toolset_20260401"}]
 )
@@ -229,7 +233,15 @@ client.beta.sessions.resources.delete(resource.id, session_id: session.id)
 
 ## List and Download Session Files
 
+<<<<<<< HEAD
 > ℹ️ Listing and downloading files an agent wrote during a session is not yet documented for Ruby in this skill or in the apps source examples. See `shared/managed-agents-events.md` and the `anthropic` Ruby gem repository for the file list/download bindings.
+=======
+```ruby
+files = client.beta.files.list(scope_id: "sesn_abc123", betas: ["managed-agents-2026-04-01"])
+content = client.beta.files.download(files.data[0].id)
+File.binwrite("output.txt", content.read)
+```
+>>>>>>> upstream/main
 
 ---
 
@@ -260,7 +272,11 @@ client.beta.sessions.delete(session.id)
 # Agent declares MCP server (no auth here — auth goes in a vault)
 agent = client.beta.agents.create(
   name: "GitHub Assistant",
+<<<<<<< HEAD
   model: :"claude-opus-4-7",
+=======
+  model: :"claude-opus-4-8",
+>>>>>>> upstream/main
   mcp_servers: [
     {
       type: "url",
