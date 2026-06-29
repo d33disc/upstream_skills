@@ -7,7 +7,11 @@
 ## Installation
 
 ```bash
+<<<<<<< HEAD
 composer require "anthropic-ai/sdk"
+=======
+composer require "anthropic-ai/sdk" "guzzlehttp/guzzle:^7"
+>>>>>>> upstream/main
 ```
 
 ## Client Initialization
@@ -48,7 +52,11 @@ use Anthropic\Beta\Agents\BetaManagedAgentsAgentToolset20260401Params;
 // 1. Create the agent (reusable, versioned)
 $agent = $client->beta->agents->create(
     name: 'Coding Assistant',
+<<<<<<< HEAD
     model: 'claude-opus-4-7',
+=======
+    model: 'claude-opus-4-8',
+>>>>>>> upstream/main
     system: 'You are a helpful coding assistant.',
     tools: [
         BetaManagedAgentsAgentToolset20260401Params::with(
@@ -263,7 +271,18 @@ $client->beta->sessions->resources->delete($resource->id, sessionID: $session->i
 
 ## List and Download Session Files
 
+<<<<<<< HEAD
 > ℹ️ Listing and downloading files an agent wrote during a session is not yet documented for PHP in this skill or in the apps source examples. See `shared/managed-agents-events.md` and the `anthropic-ai/sdk` PHP repository for the file list/download bindings.
+=======
+```php
+$files = $client->beta->files->list(
+    scopeID: 'sesn_abc123',
+    betas: ['managed-agents-2026-04-01'],
+);
+$content = $client->beta->files->download($files->data[0]->id);
+file_put_contents('output.txt', $content);
+```
+>>>>>>> upstream/main
 
 ---
 
@@ -293,15 +312,25 @@ $client->beta->sessions->delete($session->id);
 ```php
 use Anthropic\Beta\Agents\BetaManagedAgentsAgentToolset20260401Params;
 use Anthropic\Beta\Agents\BetaManagedAgentsMCPToolsetParams;
+<<<<<<< HEAD
 use Anthropic\Beta\Agents\BetaManagedAgentsUrlmcpServerParams;
+=======
+use Anthropic\Beta\Agents\BetaManagedAgentsURLMCPServerParams;
+>>>>>>> upstream/main
 use Anthropic\Beta\Sessions\BetaManagedAgentsAgentParams;
 
 // Agent declares MCP server (no auth here — auth goes in a vault)
 $agent = $client->beta->agents->create(
     name: 'GitHub Assistant',
+<<<<<<< HEAD
     model: 'claude-opus-4-7',
     mcpServers: [
         BetaManagedAgentsUrlmcpServerParams::with(
+=======
+    model: 'claude-opus-4-8',
+    mcpServers: [
+        BetaManagedAgentsURLMCPServerParams::with(
+>>>>>>> upstream/main
             type: 'url',
             name: 'github',
             url: 'https://api.githubcopilot.com/mcp/',
@@ -395,8 +424,13 @@ $session = $client->beta->sessions->create(
         [
             'type' => 'github_repository',
             'url' => 'https://github.com/org/repo',
+<<<<<<< HEAD
             'mountPath' => '/workspace/repo',
             'authorizationToken' => 'ghp_your_github_token',
+=======
+            'mount_path' => '/workspace/repo',
+            'authorization_token' => 'ghp_your_github_token',
+>>>>>>> upstream/main
         ],
     ],
 );
@@ -409,14 +443,24 @@ $resources = [
     [
         'type' => 'github_repository',
         'url' => 'https://github.com/org/frontend',
+<<<<<<< HEAD
         'mountPath' => '/workspace/frontend',
         'authorizationToken' => 'ghp_your_github_token',
+=======
+        'mount_path' => '/workspace/frontend',
+        'authorization_token' => 'ghp_your_github_token',
+>>>>>>> upstream/main
     ],
     [
         'type' => 'github_repository',
         'url' => 'https://github.com/org/backend',
+<<<<<<< HEAD
         'mountPath' => '/workspace/backend',
         'authorizationToken' => 'ghp_your_github_token',
+=======
+        'mount_path' => '/workspace/backend',
+        'authorization_token' => 'ghp_your_github_token',
+>>>>>>> upstream/main
     ],
 ];
 ```
