@@ -15,10 +15,19 @@ npm install @anthropic-ai/sdk
 ```typescript
 import Anthropic from "@anthropic-ai/sdk";
 
+<<<<<<< HEAD
 // Default (uses ANTHROPIC_API_KEY env var)
 const client = new Anthropic();
 
 // Explicit API key
+=======
+// Default — resolves credentials from the environment:
+// ANTHROPIC_API_KEY, or ANTHROPIC_AUTH_TOKEN, or an `ant auth login` profile.
+// Prefer this for local dev; don't hardcode a key.
+const client = new Anthropic();
+
+// Explicit API key (only when you must inject a specific key)
+>>>>>>> upstream/main
 const client = new Anthropic({ apiKey: "your-api-key" });
 ```
 
@@ -52,7 +61,11 @@ console.log(environment.id); // env_...
 const agent = await client.beta.agents.create(
   {
     name: "Coding Assistant",
+<<<<<<< HEAD
     model: "claude-opus-4-7",
+=======
+    model: "claude-opus-4-8",
+>>>>>>> upstream/main
     tools: [{ type: "agent_toolset_20260401", default_config: { enabled: true } }],
   },
 );
@@ -65,6 +78,10 @@ const session = await client.beta.sessions.create(
   },
 );
 console.log(session.id, session.status);
+<<<<<<< HEAD
+=======
+console.log(`Trace: https://platform.claude.com/workspaces/default/sessions/${session.id}`);
+>>>>>>> upstream/main
 ```
 
 ### With system prompt and custom tools
@@ -73,7 +90,11 @@ console.log(session.id, session.status);
 const agent = await client.beta.agents.create(
   {
     name: "Code Reviewer",
+<<<<<<< HEAD
     model: "claude-opus-4-7",
+=======
+    model: "claude-opus-4-8",
+>>>>>>> upstream/main
     system: "You are a senior code reviewer.",
     tools: [
       { type: "agent_toolset_20260401", default_config: { enabled: true } },
@@ -146,7 +167,11 @@ const [events] = await Promise.all([
 ]);
 
 // Standalone stream iteration:
+<<<<<<< HEAD
 const stream = await client.beta.sessions.stream(
+=======
+const stream = await client.beta.sessions.events.stream(
+>>>>>>> upstream/main
   session.id,
 );
 
@@ -161,7 +186,11 @@ for await (const event of stream) {
       break;
     case "agent.custom_tool_use":
       // Custom tool invocation — session is now idle
+<<<<<<< HEAD
       console.log(`\nCustom tool call: ${event.tool_name}`);
+=======
+      console.log(`\nCustom tool call: ${event.name}`);
+>>>>>>> upstream/main
       console.log(`Input: ${JSON.stringify(event.input)}`);
       break;
     case "session.status_idle":
@@ -221,11 +250,19 @@ function runCustomTool(toolName: string, toolInput: unknown): string {
 
 async function runSession(client: Anthropic, sessionId: string) {
   while (true) {
+<<<<<<< HEAD
     const stream = await client.beta.sessions.stream(
       sessionId,
     );
 
     const toolCalls: Array<{ custom_tool_use_id: string; tool_name: string; input: unknown }> = [];
+=======
+    const stream = await client.beta.sessions.events.stream(
+      sessionId,
+    );
+
+    const toolCalls: Anthropic.Beta.Sessions.BetaManagedAgentsAgentCustomToolUseEvent[] = [];
+>>>>>>> upstream/main
 
     for await (const event of stream) {
       if (event.type === "agent.message") {
@@ -235,11 +272,15 @@ async function runSession(client: Anthropic, sessionId: string) {
           }
         }
       } else if (event.type === "agent.custom_tool_use") {
+<<<<<<< HEAD
         toolCalls.push({
           id: event.id,
           tool_name: event.tool_name,
           input: event.input,
         });
+=======
+        toolCalls.push(event);
+>>>>>>> upstream/main
       } else if (event.type === "session.status_idle") {
         break;
       } else if (event.type === "session.status_terminated") {
@@ -253,7 +294,11 @@ async function runSession(client: Anthropic, sessionId: string) {
     const results = toolCalls.map((call) => ({
       type: "user.custom_tool_result" as const,
       custom_tool_use_id: call.id,
+<<<<<<< HEAD
       content: [{ type: "text" as const, text: runCustomTool(call.tool_name, call.input) }],
+=======
+      content: [{ type: "text" as const, text: runCustomTool(call.name, call.input) }],
+>>>>>>> upstream/main
     }));
 
     await client.beta.sessions.events.send(
@@ -338,7 +383,11 @@ await client.beta.sessions.archive("sesn_011CZxAbc123Def456");
 // Agent declares MCP server (no auth here — auth goes in a vault)
 const agent = await client.beta.agents.create({
   name: "MCP Agent",
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-4-8",
+>>>>>>> upstream/main
   mcp_servers: [
     { type: "url", name: "my-tools", url: "https://my-mcp-server.example.com/sse" },
   ],
