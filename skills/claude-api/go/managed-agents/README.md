@@ -38,9 +38,17 @@ ctx := context.Background()
 ```go
 environment, err := client.Beta.Environments.New(ctx, anthropic.BetaEnvironmentNewParams{
     Name: "my-dev-env",
+<<<<<<< HEAD
     Config: anthropic.BetaCloudConfigParams{
         Networking: anthropic.BetaCloudConfigParamsNetworkingUnion{
             OfUnrestricted: &anthropic.UnrestrictedNetworkParam{},
+=======
+    Config: anthropic.BetaEnvironmentNewParamsConfigUnion{
+        OfCloud: &anthropic.BetaCloudConfigParams{
+            Networking: anthropic.BetaCloudConfigParamsNetworkingUnion{
+                OfUnrestricted: &anthropic.BetaUnrestrictedNetworkParam{},
+            },
+>>>>>>> upstream/main
         },
     },
 })
@@ -63,7 +71,11 @@ fmt.Println(environment.ID) // env_...
 agent, err := client.Beta.Agents.New(ctx, anthropic.BetaAgentNewParams{
     Name: "Coding Assistant",
     Model: anthropic.BetaManagedAgentsModelConfigParams{
+<<<<<<< HEAD
         ID:   "claude-opus-4-7",
+=======
+        ID:   "claude-opus-4-8",
+>>>>>>> upstream/main
         Type: anthropic.BetaManagedAgentsModelConfigParamsTypeModelConfig,
     },
     System: anthropic.String("You are a helpful coding assistant."),
@@ -93,6 +105,10 @@ if err != nil {
     panic(err)
 }
 fmt.Printf("Session ID: %s, status: %s\n", session.ID, session.Status)
+<<<<<<< HEAD
+=======
+fmt.Printf("Trace: https://platform.claude.com/workspaces/default/sessions/%s\n", session.ID)
+>>>>>>> upstream/main
 ```
 
 ### Updating an Agent
@@ -132,7 +148,11 @@ if err != nil {
 
 ```go
 _, err = client.Beta.Sessions.Events.Send(ctx, session.ID, anthropic.BetaSessionEventSendParams{
+<<<<<<< HEAD
     Events: []anthropic.SendEventsParamsUnion{{
+=======
+    Events: []anthropic.BetaManagedAgentsEventParamsUnion{{
+>>>>>>> upstream/main
         OfUserMessage: &anthropic.BetaManagedAgentsUserMessageEventParams{
             Type: anthropic.BetaManagedAgentsUserMessageEventParamsTypeUserMessage,
             Content: []anthropic.BetaManagedAgentsUserMessageEventParamsContentUnion{{
@@ -161,7 +181,11 @@ stream := client.Beta.Sessions.Events.StreamEvents(ctx, session.ID, anthropic.Be
 defer stream.Close()
 
 if _, err := client.Beta.Sessions.Events.Send(ctx, session.ID, anthropic.BetaSessionEventSendParams{
+<<<<<<< HEAD
     Events: []anthropic.SendEventsParamsUnion{{
+=======
+    Events: []anthropic.BetaManagedAgentsEventParamsUnion{{
+>>>>>>> upstream/main
         OfUserMessage: &anthropic.BetaManagedAgentsUserMessageEventParams{
             Type: anthropic.BetaManagedAgentsUserMessageEventParamsTypeUserMessage,
             Content: []anthropic.BetaManagedAgentsUserMessageEventParamsContentUnion{{
@@ -380,11 +404,19 @@ if err != nil {
 agent, err := client.Beta.Agents.New(ctx, anthropic.BetaAgentNewParams{
     Name: "GitHub Assistant",
     Model: anthropic.BetaManagedAgentsModelConfigParams{
+<<<<<<< HEAD
         ID:   "claude-opus-4-7",
         Type: anthropic.BetaManagedAgentsModelConfigParamsTypeModelConfig,
     },
     MCPServers: []anthropic.BetaManagedAgentsUrlmcpServerParams{{
         Type: anthropic.BetaManagedAgentsUrlmcpServerParamsTypeURL,
+=======
+        ID:   "claude-opus-4-8",
+        Type: anthropic.BetaManagedAgentsModelConfigParamsTypeModelConfig,
+    },
+    MCPServers: []anthropic.BetaManagedAgentsURLMCPServerParams{{
+        Type: anthropic.BetaManagedAgentsURLMCPServerParamsTypeURL,
+>>>>>>> upstream/main
         Name: "github",
         URL:  "https://api.githubcopilot.com/mcp/",
     }},
