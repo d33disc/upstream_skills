@@ -24,7 +24,11 @@ const messageBatch = await client.messages.batches.create({
     {
       custom_id: "request-1",
       params: {
+<<<<<<< HEAD
         model: "claude-opus-4-7",
+=======
+        model: "claude-opus-4-8",
+>>>>>>> upstream/main
         max_tokens: 16000,
         messages: [
           { role: "user", content: "Summarize climate change impacts" },
@@ -34,7 +38,11 @@ const messageBatch = await client.messages.batches.create({
     {
       custom_id: "request-2",
       params: {
+<<<<<<< HEAD
         model: "claude-opus-4-7",
+=======
+        model: "claude-opus-4-8",
+>>>>>>> upstream/main
         max_tokens: 16000,
         messages: [
           { role: "user", content: "Explain quantum computing basics" },

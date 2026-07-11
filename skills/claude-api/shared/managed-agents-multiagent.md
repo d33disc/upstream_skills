@@ -13,7 +13,11 @@ The SDK sets the `managed-agents-2026-04-01` beta header automatically on all `c
 ```python
 orchestrator = client.beta.agents.create(
     name="Engineering Lead",
+<<<<<<< HEAD
     model="{{OPUS_ID}}",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     system="You coordinate engineering work. Delegate code review to the reviewer and test writing to the test agent.",
     tools=[{"type": "agent_toolset_20260401"}],
     multiagent={
@@ -35,6 +39,11 @@ session = client.beta.sessions.create(agent=orchestrator.id, environment_id=env.
 | Agent reference | `{type: "agent", id, version?}` | Omit `version` to pin the latest at coordinator save time. |
 | Self | `{type: "self"}` | The coordinator can spawn copies of itself. |
 
+<<<<<<< HEAD
+=======
+If the session was created with `agent_with_overrides` (see `shared/managed-agents-core.md` → Override agent configuration for a session), those overrides apply to the **coordinator and its `self` copies**. Roster agents referenced by ID always use their own as-created configuration — overrides do not propagate to them.
+
+>>>>>>> upstream/main
 Up to **20 unique agents** in the roster; the coordinator may spawn **multiple copies** of each. **One level of delegation only** — depth > 1 is ignored.
 
 ---
