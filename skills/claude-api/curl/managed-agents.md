@@ -42,7 +42,13 @@ curl -X POST https://api.anthropic.com/v1/environments \
     "config": {
       "type": "cloud",
       "networking": {
+<<<<<<< HEAD
         "type": "package_managers_and_custom",
+=======
+        "type": "limited",
+        "allow_package_managers": true,
+        "allow_mcp_servers": true,
+>>>>>>> upstream/main
         "allowed_hosts": ["api.example.com"]
       }
     }
@@ -63,7 +69,11 @@ curl -X POST https://api.anthropic.com/v1/agents \
   "${HEADERS[@]}" \
   -d '{
     "name": "Coding Assistant",
+<<<<<<< HEAD
     "model": "claude-opus-4-7",
+=======
+    "model": "claude-opus-4-8",
+>>>>>>> upstream/main
     "tools": [{ "type": "agent_toolset_20260401" }]
   }'
 # → { "id": "agent_abc123", ... }
@@ -75,6 +85,11 @@ curl -X POST https://api.anthropic.com/v1/sessions \
     "agent": { "type": "agent", "id": "agent_abc123", "version": "1772585501101368014" },
     "environment_id": "env_abc123"
   }'
+<<<<<<< HEAD
+=======
+# → { "id": "sesn_abc123", ... }
+# Trace: https://platform.claude.com/workspaces/default/sessions/sesn_abc123
+>>>>>>> upstream/main
 ```
 
 ### With system prompt, custom tools, and GitHub repo
@@ -85,7 +100,11 @@ curl -X POST https://api.anthropic.com/v1/agents \
   "${HEADERS[@]}" \
   -d '{
     "name": "Code Reviewer",
+<<<<<<< HEAD
     "model": "claude-opus-4-7",
+=======
+    "model": "claude-opus-4-8",
+>>>>>>> upstream/main
     "system": "You are a senior code reviewer. Be thorough and constructive.",
     "tools": [
       { "type": "agent_toolset_20260401" },
@@ -291,7 +310,11 @@ curl -X POST https://api.anthropic.com/v1/agents \
   "${HEADERS[@]}" \
   -d '{
     "name": "MCP Agent",
+<<<<<<< HEAD
     "model": "claude-opus-4-7",
+=======
+    "model": "claude-opus-4-8",
+>>>>>>> upstream/main
     "mcp_servers": [
       { "type": "url", "name": "my-tools", "url": "https://my-mcp-server.example.com/sse" }
     ],
@@ -322,7 +345,11 @@ curl -X POST https://api.anthropic.com/v1/agents \
   "${HEADERS[@]}" \
   -d '{
     "name": "Restricted Agent",
+<<<<<<< HEAD
     "model": "claude-opus-4-7",
+=======
+    "model": "claude-opus-4-8",
+>>>>>>> upstream/main
     "tools": [
       {
         "type": "agent_toolset_20260401",
