@@ -16,14 +16,18 @@ ______________________________________________________________________
 
 ## Upload a File
 
+The `file` argument accepts a `(filename, content, content_type)` tuple, a `pathlib.Path` (or any `PathLike` — read for you, async-safe with `AsyncAnthropic`), or an open binary file object.
+
 ```python
 import anthropic
+from pathlib import Path
 
 client = anthropic.Anthropic()
 
 uploaded = client.beta.files.upload(
     file=("report.pdf", open("report.pdf", "rb"), "application/pdf"),
 )
+# or: client.beta.files.upload(file=Path("report.pdf"))
 print(f"File ID: {uploaded.id}")
 print(f"Size: {uploaded.size_bytes} bytes")
 ```
@@ -36,7 +40,11 @@ ______________________________________________________________________
 
 ```python
 response = client.beta.messages.create(
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     max_tokens=16000,
     messages=[{
         "role": "user",
@@ -65,7 +73,11 @@ image_file = client.beta.files.upload(
 )
 
 response = client.beta.messages.create(
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     max_tokens=16000,
     messages=[{
         "role": "user",
@@ -87,9 +99,10 @@ ______________________________________________________________________
 
 ### List Files
 
+Iterate the list result directly — the SDK auto-paginates across all pages. Only use `.data` if you want the first page only.
+
 ```python
-files = client.beta.files.list()
-for f in files.data:
+for f in client.beta.files.list():
     print(f"{f.id}: {f.filename} ({f.size_bytes} bytes)")
 ```
 
@@ -142,7 +155,11 @@ questions = [
 
 for question in questions:
     response = client.beta.messages.create(
+<<<<<<< HEAD
         model="claude-opus-4-7",
+=======
+        model="claude-opus-4-8",
+>>>>>>> upstream/main
         max_tokens=16000,
         messages=[{
             "role": "user",
