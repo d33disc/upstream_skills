@@ -6,8 +6,20 @@ import re
 from pathlib import Path
 
 import defusedxml.minidom
+from functools import lru_cache
+
 import lxml.etree
 
+from helpers import safe_extract
+
+
+@lru_cache(maxsize=None)
+def _load_schema(schema_path: str):
+    with open(schema_path, "rb") as xsd_file:
+        xsd_doc = lxml.etree.parse(
+            xsd_file, parser=lxml.etree.XMLParser(), base_url=schema_path
+        )
+    return lxml.etree.XMLSchema(xsd_doc)
 
 class BaseSchemaValidator:
     IGNORED_VALIDATION_ERRORS = [
@@ -112,9 +124,10 @@ class BaseSchemaValidator:
             try:
                 content = xml_file.read_text(encoding="utf-8")
                 dom = defusedxml.minidom.parseString(content)
-                modified = False
+                pending = []  
 
                 for elem in dom.getElementsByTagName("*"):
+<<<<<<< HEAD
                     if elem.tagName.endswith(":t") and elem.firstChild:
                         text = elem.firstChild.nodeValue
                         if text and (text.startswith((" ", "\t")) or text.endswith((" ", "\t"))):
@@ -128,9 +141,27 @@ class BaseSchemaValidator:
                                 )
                                 repairs += 1
                                 modified = True
+=======
+                    local_name = elem.tagName.rsplit(":", 1)[-1]
+                    if local_name in ("t", "delText", "instrText", "delInstrText"):
+                        text = "".join(
+                            child.data
+                            for child in elem.childNodes
+                            if child.nodeType in (child.TEXT_NODE, child.CDATA_SECTION_NODE)
+                        )
+                        ws = (" ", "\t", "\n", "\r")
+                        if text and (text.startswith(ws) or text.endswith(ws)):
+                            if elem.getAttribute("xml:space") != "preserve":
+                                elem.setAttribute("xml:space", "preserve")
+                                text_preview = repr(text[:30]) + "..." if len(text) > 30 else repr(text)
+                                pending.append(f"  Repaired: {xml_file.name}: Added xml:space='preserve' to {elem.tagName}: {text_preview}")
+>>>>>>> upstream/main
 
-                if modified:
+                if pending:
                     xml_file.write_bytes(dom.toxml(encoding="UTF-8"))
+                    for message in pending:
+                        print(message)
+                    repairs += len(pending)
 
             except Exception:
                 pass
@@ -205,7 +236,17 @@ class BaseSchemaValidator:
                     elem.getparent().remove(elem)
 
                 for elem in root.iter():
+<<<<<<< HEAD
                     tag = elem.tag.split("}")[-1].lower() if "}" in elem.tag else elem.tag.lower()
+=======
+                    if not hasattr(elem, "tag") or callable(elem.tag):
+                        continue
+                    tag = (
+                        elem.tag.split("}")[-1].lower()
+                        if "}" in elem.tag
+                        else elem.tag.lower()
+                    )
+>>>>>>> upstream/main
 
                     if tag in self.UNIQUE_ID_REQUIREMENTS:
                         in_excluded_container = any(
@@ -307,7 +348,15 @@ class BaseSchemaValidator:
                     namespaces={"ns": self.PACKAGE_RELATIONSHIPS_NAMESPACE},
                 ):
                     target = rel.get("Target")
+<<<<<<< HEAD
                     if target and not target.startswith(("http", "mailto:")):
+=======
+                    if rel.get("TargetMode") == "External":
+                        continue
+                    if target and not target.startswith(
+                        ("http", "mailto:")
+                    ):  
+>>>>>>> upstream/main
                         if target.startswith("/"):
                             target_path = self.unpacked_dir / target.lstrip("/")
                         elif rels_file.name == ".rels":
@@ -398,6 +447,8 @@ class BaseSchemaValidator:
                 r_ns = self.OFFICE_RELATIONSHIPS_NAMESPACE
                 rid_attrs_to_check = ["id", "embed", "link"]
                 for elem in xml_root.iter():
+                    if not hasattr(elem, "tag") or callable(elem.tag):
+                        continue
                     for attr_name in rid_attrs_to_check:
                         rid_attr = elem.get(f"{{{r_ns}}}{attr_name}")
                         if not rid_attr:
@@ -704,16 +755,23 @@ class BaseSchemaValidator:
 
         return xml_doc
 
-    def _validate_single_file_xsd(self, xml_file, base_path):
-        schema_path = self._get_schema_path(xml_file)
+    def _preprocess_for_schema(self, xml_doc, relative_path):
+        return xml_doc
+
+    def _validate_single_file_xsd(self, xml_file, base_path, schema_path=None):
+        schema_path = schema_path or self._get_schema_path(xml_file)
         if not schema_path:
             return None, None
 
         try:
+<<<<<<< HEAD
             with open(schema_path, "rb") as xsd_file:
                 parser = lxml.etree.XMLParser()
                 xsd_doc = lxml.etree.parse(xsd_file, parser=parser, base_url=str(schema_path))
                 schema = lxml.etree.XMLSchema(xsd_doc)
+=======
+            schema = _load_schema(str(schema_path))
+>>>>>>> upstream/main
 
             with open(xml_file) as f:
                 xml_doc = lxml.etree.parse(f)
@@ -724,6 +782,8 @@ class BaseSchemaValidator:
             relative_path = xml_file.relative_to(base_path)
             if relative_path.parts and relative_path.parts[0] in self.MAIN_CONTENT_FOLDERS:
                 xml_doc = self._clean_ignorable_namespaces(xml_doc)
+
+            xml_doc = self._preprocess_for_schema(xml_doc, relative_path)
 
             if schema.validate(xml_doc):
                 return True, set()
@@ -736,7 +796,7 @@ class BaseSchemaValidator:
         except Exception as e:
             return False, {str(e)}
 
-    def _get_original_file_errors(self, xml_file):
+    def _get_original_file_errors(self, xml_file, schema_path=None):
         if self.original_file is None:
             return set()
 
@@ -750,15 +810,24 @@ class BaseSchemaValidator:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
 
-            with zipfile.ZipFile(self.original_file, "r") as zip_ref:
-                zip_ref.extractall(temp_path)
+            try:
+                with zipfile.ZipFile(self.original_file, "r") as zip_ref:
+                    safe_extract(zip_ref, temp_path)
+            except (zipfile.BadZipFile, ValueError, OSError):
+                return set()
 
             original_xml_file = temp_path / relative_path
 
             if not original_xml_file.exists():
                 return set()
 
+<<<<<<< HEAD
             is_valid, errors = self._validate_single_file_xsd(original_xml_file, temp_path)
+=======
+            is_valid, errors = self._validate_single_file_xsd(
+                original_xml_file, temp_path, schema_path=schema_path
+            )
+>>>>>>> upstream/main
             return errors if errors else set()
 
     def _remove_template_tags_from_text_nodes(self, xml_doc):
