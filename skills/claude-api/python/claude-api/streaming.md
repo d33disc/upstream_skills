@@ -4,7 +4,11 @@
 
 ```python
 with client.messages.stream(
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     max_tokens=64000,
     messages=[{"role": "user", "content": "Write a story"}]
 ) as stream:
@@ -16,7 +20,11 @@ with client.messages.stream(
 
 ```python
 async with async_client.messages.stream(
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     max_tokens=64000,
     messages=[{"role": "user", "content": "Write a story"}]
 ) as stream:
@@ -24,12 +32,33 @@ async with async_client.messages.stream(
         print(text, end="", flush=True)
 ```
 
+<<<<<<< HEAD
 ______________________________________________________________________
+=======
+### Low-level: `stream=True`
+
+`messages.stream()` (above) is the recommended helper — it accumulates state and exposes `text_stream` / `get_final_message()`. If you only need the raw event iterator and want lower memory use, pass `stream=True` to `messages.create()` instead:
+
+```python
+for event in client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=64000,
+    messages=[{"role": "user", "content": "Write a story"}],
+    stream=True,
+):
+    print(event.type)
+```
+
+No final-message accumulation is done for you in this form.
+
+---
+>>>>>>> upstream/main
 
 ## Handling Different Content Types
 
 Claude may return text, thinking blocks, or tool use. Handle each appropriately:
 
+<<<<<<< HEAD
 > **Opus 4.7 / Opus 4.6:** Use `thinking: {type: "adaptive"}`. On older models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
 
 ```python
@@ -37,6 +66,15 @@ with client.messages.stream(
     model="claude-opus-4-7",
     max_tokens=64000,
     thinking={"type": "adaptive"},
+=======
+> **Fable 5 / Opus 4.8 / Opus 4.7 / Opus 4.6:** Use `thinking: {type: "adaptive"}`. On older models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
+
+```python
+with client.messages.stream(
+    model="claude-opus-4-8",
+    max_tokens=64000,
+    thinking={"type": "adaptive", "display": "summarized"},  # display opt-in: default is omitted (empty thinking text) on Fable 5 / Mythos 5 / Opus 4.8 / 4.7
+>>>>>>> upstream/main
     messages=[{"role": "user", "content": "Analyze this problem"}]
 ) as stream:
     for event in stream:
@@ -61,7 +99,11 @@ The Python tool runner currently returns complete messages. Use streaming for in
 
 ```python
 with client.messages.stream(
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     max_tokens=64000,
     tools=tools,
     messages=messages
@@ -79,7 +121,11 @@ ______________________________________________________________________
 
 ```python
 with client.messages.stream(
+<<<<<<< HEAD
     model="claude-opus-4-7",
+=======
+    model="claude-opus-4-8",
+>>>>>>> upstream/main
     max_tokens=64000,
     messages=[{"role": "user", "content": "Hello"}]
 ) as stream:
@@ -126,7 +172,11 @@ ______________________________________________________________________
 ```python
 try:
     with client.messages.stream(
+<<<<<<< HEAD
         model="claude-opus-4-7",
+=======
+        model="claude-opus-4-8",
+>>>>>>> upstream/main
         max_tokens=64000,
         messages=[{"role": "user", "content": "Write a story"}]
     ) as stream:
@@ -156,7 +206,15 @@ ______________________________________________________________________
 ## Best Practices
 
 1. **Always flush output** — Use `flush=True` to show tokens immediately
+<<<<<<< HEAD
 1. **Handle partial responses** — If the stream is interrupted, you may have incomplete content
 1. **Track token usage** — The `message_delta` event contains usage information
 1. **Use timeouts** — Set appropriate timeouts for your application
 1. **Default to streaming** — Use `.get_final_message()` to get the complete response even when streaming, giving you timeout protection without needing to handle individual events
+=======
+2. **Handle partial responses** — If the stream is interrupted, you may have incomplete content
+3. **Track token usage** — The `message_delta` event contains usage information
+4. **Use timeouts** — Set appropriate timeouts for your application
+5. **Default to streaming** — Use `.get_final_message()` to get the complete response even when streaming, giving you timeout protection without needing to handle individual events
+6. **Large `max_tokens` without streaming raises `ValueError`** — The SDK refuses non-streaming requests it estimates will exceed ~10 minutes (idle connections drop). Pass `stream=True` / use `messages.stream()`, or explicitly override `timeout`, to suppress the guard.
+>>>>>>> upstream/main
