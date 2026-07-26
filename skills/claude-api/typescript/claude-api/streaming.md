@@ -4,7 +4,11 @@
 
 ```typescript
 const stream = client.messages.stream({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-5",
+>>>>>>> upstream/main
   max_tokens: 64000,
   messages: [{ role: "user", content: "Write a story" }],
 });
@@ -23,6 +27,7 @@ ______________________________________________________________________
 
 ## Handling Different Content Types
 
+<<<<<<< HEAD
 > **Opus 4.7 / Opus 4.6:** Use `thinking: {type: "adaptive"}`. On older models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
 
 ```typescript
@@ -30,6 +35,15 @@ const stream = client.messages.stream({
   model: "claude-opus-4-7",
   max_tokens: 64000,
   thinking: { type: "adaptive" },
+=======
+> **Fable 5 / Claude Opus 5 / Opus 4.8 / Opus 4.7 / Opus 4.6:** Use `thinking: {type: "adaptive"}`. On Claude Opus 5 adaptive is also what you get by omitting `thinking` entirely. On older models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
+
+```typescript
+const stream = client.messages.stream({
+  model: "claude-opus-5",
+  max_tokens: 64000,
+  thinking: { type: "adaptive", display: "summarized" }, // display opt-in: default is omitted (empty thinking text) on Fable 5 / Mythos 5 / Claude Opus 5 / Opus 4.8 / 4.7
+>>>>>>> upstream/main
   messages: [{ role: "user", content: "Analyze this problem" }],
 });
 
@@ -82,7 +96,11 @@ const getWeather = betaZodTool({
 });
 
 const runner = client.beta.messages.toolRunner({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-5",
+>>>>>>> upstream/main
   max_tokens: 64000,
   tools: [getWeather],
   messages: [
@@ -117,7 +135,11 @@ ______________________________________________________________________
 
 ```typescript
 const stream = client.messages.stream({
+<<<<<<< HEAD
   model: "claude-opus-4-7",
+=======
+  model: "claude-opus-5",
+>>>>>>> upstream/main
   max_tokens: 64000,
   messages: [{ role: "user", content: "Hello" }],
 });
