@@ -41,8 +41,10 @@ and `references/fact-authoring-governing-rules.md` — **rule 1 (a308) is the on
 violate at scale.**
 
 > **Version check, do not skip.** `FACT-ONTOLOGY.md` and `references/conventions.md` both
-> announce **v2.25** in their headers; the engine is at **v2.28**. The registries were amended
-> past the prose. When they disagree, `bin/facts/parse.py` + `bin/facts/registries.py` are the
+> announce **v2.25** in their headers; the engine is further ahead still -- `parse.py` carries
+> **v2.28** and `references/predicate-registry.md` carries **v2.30** amendments (`authored`,
+> `circulated`). Three different numbers in three places; the registries were amended past the
+> prose and the code past this note. When they disagree, `bin/facts/parse.py` + `bin/facts/registries.py` are the
 > spec — the regex *is* the grammar. v2.28 adds the `[as: <capacity>]` facet and a **frame
 > registry**: every predicate must belong to a family, enforced at load time.
 
