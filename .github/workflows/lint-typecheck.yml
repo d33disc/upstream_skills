@@ -30,9 +30,9 @@
 name: Daily Lint & Type Check
 
 on:
-  schedule:
-    # Run at 06:00 UTC every day
-    - cron: "0 6 * * *"
+  # schedule:
+  #   # Run at 06:00 UTC every day
+  #   - cron: "0 6 * * *"
   # Allow a one-off run from the Actions tab at any time
   workflow_dispatch:
 

@@ -34,9 +34,9 @@ on:
       - "scripts/**"
       - "references/**"
       - "assets/**"
-  schedule:
-    # Runs daily alongside the main lint workflow (06:00 UTC)
-    - cron: "0 6 * * *"
+  # schedule:
+  #   # Runs daily alongside the main lint workflow (06:00 UTC)
+  #   - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
