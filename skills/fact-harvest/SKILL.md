@@ -130,6 +130,29 @@ inspect one before trusting the number. The `{typed, queued}` allowlist alone ad
 turns on the remote harness (where genuine turns carry `origin.kind: human` + `promptSource:
 sdk`), and a silent zero-harvest is indistinguishable from a clean run.
 
+### Before building anything: measure the ELIGIBLE POOL, not the corpus
+
+**Chris's standing reflex (ratified 2026-08-03).** Whenever this work suggests a pipeline --
+a batch re-anchorer, a scraper, an importer, a migration -- measure the **admissible fraction**
+before designing it. A spec sizes work by the corpus; cost is governed by what survives the
+filters that actually gate the write (provenance, privacy, entailment, schema). Measuring is
+cheap and it routinely inverts the decision:
+
+| proposed | framed as | eligible pool | verdict |
+| --- | --- | --- | --- |
+| lead re-anchoring | 83,685 tool-result entries | **7** pasted-document turns | do not build |
+| repo-internal scrape | 12,863 lines of `journal/` + docs | **5** / **0** | do not build |
+
+Both collapsed by three orders of magnitude, for two reusable reasons: a **copy of an
+authority that still exists is not evidence** (the correct handling is "fetch the original",
+which needs no storage), and **eligible items cluster in exactly the domains the privacy fork
+refuses** -- a count cannot see that, only triage can.
+
+State the eligibility test explicitly, put the number in the spec, and check it is insensitive
+to the threshold (7 at 200ch vs 6 at 800ch is what makes a scope call safe). If the output
+would need human re-checking line by line, the pipeline saves nothing and disarms the guard.
+**A "do not build" with evidence is a real deliverable.**
+
 ### A machine summary inside a human turn — the Gemini trap
 
 A Gmail message pasted from the web UI carries **Gmail's own LLM summary above the message,
