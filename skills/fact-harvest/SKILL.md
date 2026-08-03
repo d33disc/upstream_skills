@@ -130,6 +130,32 @@ inspect one before trusting the number. The `{typed, queued}` allowlist alone ad
 turns on the remote harness (where genuine turns carry `origin.kind: human` + `promptSource:
 sdk`), and a silent zero-harvest is indistinguishable from a clean run.
 
+### A machine summary inside a human turn — the Gemini trap
+
+A Gmail message pasted from the web UI carries **Gmail's own LLM summary above the message,
+in the same blob**:
+
+```
+  AI Overview
+  Alexis forwarded Quote #193595 for $2,232.94 total balance.
+  By Gemini; there may be mistakes. Learn more     <- the blob says so itself
+  ---- the actual forwarded email begins here ----
+```
+
+Quote the top of that paste and you attribute **Gemini's paraphrase to the sender**. The
+literal floor cannot save you: the summary copies real numbers correctly, so every number in
+the claim appears in the "quote" — `e231` drift with a machine as the drifting author.
+
+Chris's ruling (2026-08-03): the block **"must be ignored as noise."** `strip_injections()`
+now removes it mechanically, on the same justification as the harness wrappers — *bytes no
+human authored, arriving inside a turn a human did author*. It strips only when the `By
+Gemini` terminator bounds the block; unbounded, it strips nothing and leaves the turn for a
+human, because over-stripping would delete Chris's own words.
+
+Do not rely on it. **Fetch the message by id through nexus and anchor to `email:`** — the
+stripper is the floor, not the method. Generalizes past Gmail: any pasted UI may interleave a
+machine summary with the primary bytes, and only the primary bytes can be quoted.
+
 ## 4 · The privacy fork — before writing, decide the sink
 
 `publishable:` gates **export, not the commit.** Every file under `knowledge/` and `people/` is

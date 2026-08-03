@@ -169,6 +169,38 @@ class ContentExtraction(unittest.TestCase):
         raw = "<command-name>/me:start</command-name>\nI sold the company."
         self.assertEqual(hs.strip_injections(raw), "I sold the company.")
 
+    def test_gemini_ai_overview_is_stripped(self):
+        """Gmail's own LLM summary rides ABOVE the message in a web-UI paste.
+
+        Quoting it attributes GEMINI's paraphrase to the sender. The literal floor
+        cannot catch this: the summary copies real numbers correctly, so every number
+        in the claim appears in the "quote". It is the e231 drift failure with a
+        machine as the drifting author. Chris's ruling (2026-08-03): the block "must
+        be ignored as noise" -- so it is removed mechanically, not by a reading rule.
+        Real bytes, from session 0c2e0992.
+        """
+        raw = (
+            "Fwd: Northern Outdoors Quote 2 of 2\n"
+            "AI Overview\n"
+            "Alexis forwarded Quote #193595 for $2,232.94 total balance.\n"
+            "Total balance due is $2,232.94; call or use pay link to book.\n"
+            "By Gemini; there may be mistakes. Learn more\n"
+            "Quote#: 193595 ? Arrival Date: 9/4/2026"
+        )
+        out = hs.strip_injections(raw)
+        self.assertNotIn("By Gemini", out)
+        self.assertNotIn("Alexis forwarded Quote", out)
+        # the PRIMARY bytes on both sides of the summary must survive
+        self.assertIn("Fwd: Northern Outdoors Quote 2 of 2", out)
+        self.assertIn("Quote#: 193595", out)
+
+    def test_ai_overview_without_terminator_is_left_alone(self):
+        """Fail SAFE: with no `By Gemini` terminator we cannot bound the block, so we
+        strip nothing and let a human read it. Over-stripping would silently delete
+        Chris's own words."""
+        raw = "AI Overview is a feature I want to disable in Gmail settings."
+        self.assertEqual(hs.strip_injections(raw), raw)
+
     def test_turn_text_is_stripped_of_injections_end_to_end(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

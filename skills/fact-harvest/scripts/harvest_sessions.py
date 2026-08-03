@@ -81,6 +81,23 @@ _INJECTED = re.compile(
     re.DOTALL,
 )
 
+# Gmail's own LLM summary, which rides ABOVE the message inside a web-UI paste and is
+# therefore INSIDE an otherwise-genuine human turn. Quoting it attributes GEMINI's
+# paraphrase to the sender, and the literal floor cannot catch that: the summary copies
+# real numbers correctly, so every number in the claim appears in the "quote". Same drift
+# as e231, with a machine as the drifting author. Chris's ruling 2026-08-03: it "must be
+# ignored as noise" -- so it is removed mechanically rather than by a rule a reader must
+# remember (make the wrong state unconstructable).
+#
+# The terminator is REQUIRED. Gmail always closes the block with its own disclaimer
+# ("By Gemini; there may be mistakes"), and without it we cannot bound the summary --
+# so we strip NOTHING and leave it for a human. Over-stripping would silently delete
+# Chris's own words, which is the worse failure of the two.
+_AI_OVERVIEW = re.compile(
+    r"^[ \t]*AI Overview\b.*?^[ \t]*By (?:Gemini|Google AI)\b[^\n]*\n?",
+    re.DOTALL | re.MULTILINE,
+)
+
 # `origin.kind` is the only field observed to mean "a person authored this".
 # `promptSource` values that mean the same thing on the macOS harness. NOTE the
 # absentee: `sdk` is NOT admitted on its own -- it says the turn arrived through
@@ -129,8 +146,12 @@ def block_text(content) -> str:
 
 
 def strip_injections(text: str) -> str:
-    """Remove harness-injected wrappers from inside a human turn."""
-    return _INJECTED.sub("", text).strip()
+    """Remove harness wrappers AND machine summaries from inside a human turn.
+
+    Both are bytes no human authored that arrive inside a turn a human did author,
+    so both would be quoted as testimony if left in place.
+    """
+    return _AI_OVERVIEW.sub("", _INJECTED.sub("", text)).strip()
 
 
 def is_human_turn(entry: dict) -> tuple[bool, str]:
