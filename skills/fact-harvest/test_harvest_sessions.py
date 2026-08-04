@@ -148,6 +148,116 @@ class FilterRejects(unittest.TestCase):
         self.assertEqual(reason, "unknown-origin")
 
 
+class LegacyHarnessRail(unittest.TestCase):
+    """The May-2026 corpus -- 1,519 transcripts, the largest month on disk -- was
+    written by a CLI that emitted NEITHER `origin` NOR `promptSource`. Both admit
+    rails therefore missed every turn in it and the driver reported a clean run:
+    248 transcripts listed of 3,402 scanned, with 2,211 turns Chris unmistakably
+    typed ("push it", "commit to main", "Push and open a PR.") counted only as
+    `unknown-origin`. That is the exact silent-zero this filter's own docstring
+    warns about, realised.
+
+    The rail admits on the ABSENCE of two fields, which fails OPEN for any future
+    harness that stops writing them -- so it is ceilinged at the last version
+    observed without them (2.1.160; `promptSource` goes populated at 2.1.161).
+    The historical corpus is a closed set and cannot grow, so the ceiling cannot
+    widen behind us.
+    """
+
+    def legacy(self, **over):
+        """A May-2026 interactive turn: no origin, no promptSource, no successor."""
+        base = dict(entrypoint="cli", origin=None, promptSource=None, version="2.1.142")
+        base.update(over)
+        return entry(**base)
+
+    def test_legacy_interactive_turn_is_admitted(self):
+        admitted, reason = hs.is_human_turn(self.legacy())
+        self.assertTrue(admitted, "the whole May corpus hangs on this")
+        self.assertEqual(reason, "legacy-interactive")
+
+    def test_legacy_rail_is_ceilinged_at_the_last_fieldless_version(self):
+        """At 2.1.161 the harness populates promptSource, so a field-less turn is
+        no longer explained by the harness's age -- it must fail closed again."""
+        admitted, reason = hs.is_human_turn(self.legacy(version="2.1.161"))
+        self.assertFalse(admitted)
+        self.assertEqual(reason, "unknown-origin")
+
+    def test_legacy_rail_fails_closed_on_a_future_major(self):
+        """A 2.2.x / 3.x harness must not inherit the exemption by arithmetic
+        accident, nor may an unparseable version open the rail."""
+        for version in ("2.2.0", "3.0.1", "", "nightly", None):
+            with self.subTest(version=version):
+                admitted, reason = hs.is_human_turn(self.legacy(version=version))
+                self.assertFalse(admitted)
+                self.assertEqual(reason, "unknown-origin")
+
+    def test_legacy_rail_refuses_programmatic_entrypoints(self):
+        """`sdk-cli` is where the Williams-pass batch jobs live: machine-composed
+        prompts, in the same months, also field-less. The entrypoint is what
+        separates them from a person at a keyboard."""
+        for ep in ("sdk-cli", "remote", "sdk", None):
+            with self.subTest(entrypoint=ep):
+                admitted, reason = hs.is_human_turn(self.legacy(entrypoint=ep))
+                self.assertFalse(admitted)
+                self.assertEqual(reason, "unknown-origin")
+
+
+class WholeTurnArtifacts(unittest.TestCase):
+    """Two harness artifacts arrive as whole user turns in EVERY era. They were
+    harmless while the legacy rail was shut; opening it makes rejecting them
+    load-bearing.
+
+    Both match at the START of the turn, never anywhere inside it. A genuine turn
+    that PASTES bash output is Chris's own words about his own work, and an
+    unanchored match would silently delete it -- the same class of loss this
+    change exists to repair.
+    """
+
+    def legacy(self, text):
+        return entry(
+            entrypoint="cli", origin=None, promptSource=None,
+            version="2.1.142", message={"content": text},
+        )
+
+    def test_ctrl_b_bash_turns_rejected(self):
+        for text in (
+            "<bash-input>bash scripts/autopilot_arm.sh 7</bash-input>",
+            "<bash-stdout></bash-stdout><bash-stderr>command not found</bash-stderr>",
+            "  <bash-stdout>(Bash completed with no output)</bash-stdout>",
+        ):
+            with self.subTest(text=text[:30]):
+                admitted, reason = hs.is_human_turn(self.legacy(text))
+                self.assertFalse(admitted)
+                self.assertEqual(reason, "bash-mode-artifact")
+
+    def test_pasted_bash_output_inside_a_human_turn_is_kept(self):
+        """The anchoring test. Chris quoting his own terminal is testimony."""
+        text = (
+            "the deploy broke, here is what it said: "
+            "<bash-stderr>fatal: no such ref</bash-stderr> -- fix it"
+        )
+        admitted, reason = hs.is_human_turn(self.legacy(text))
+        self.assertTrue(admitted)
+        self.assertEqual(reason, "legacy-interactive")
+
+    def test_compaction_continuation_rejected(self):
+        text = (
+            "This session is being continued from a previous conversation that ran "
+            "out of context. The summary below covers the earlier portion..."
+        )
+        admitted, reason = hs.is_human_turn(self.legacy(text))
+        self.assertFalse(admitted)
+        self.assertEqual(reason, "compaction-artifact")
+
+    def test_whole_turn_artifacts_are_refused_in_the_modern_era_too(self):
+        """These are harness bytes regardless of which harness wrote them."""
+        admitted, reason = hs.is_human_turn(
+            entry(message={"content": "<bash-input>ls</bash-input>"})
+        )
+        self.assertFalse(admitted)
+        self.assertEqual(reason, "bash-mode-artifact")
+
+
 class ContentExtraction(unittest.TestCase):
     def test_block_list_keeps_only_text_blocks(self):
         content = [

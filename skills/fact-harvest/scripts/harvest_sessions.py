@@ -114,6 +114,47 @@ _AI_OVERVIEW = re.compile(
 # `sdk` would additionally admit programmatic turns that no one typed.
 _ADMIT_PROMPT_SOURCES = frozenset({"typed", "queued"})
 
+# THE LEGACY RAIL. Before 2.1.161 the CLI wrote NEITHER `origin` NOR `promptSource`,
+# so both rails above missed every turn in the May-2026 corpus -- 1,519 transcripts,
+# the largest month on disk -- and the driver reported a clean run over it. Measured
+# 2026-08-04: 248 transcripts listed of 3,402 scanned, and the May `unknown-origin`
+# count decomposes exactly as 7,428 task-notifications (machine bytes, correctly
+# refused) + 2,211 turns Chris typed ("push it", "commit to main", "Push and open a
+# PR."). The silent zero this module's docstring warns about, realised.
+#
+# This rail admits on the ABSENCE of two fields, so it fails OPEN for any future
+# harness that stops writing them -- the one direction this filter must never fail.
+# It is therefore CEILINGED at the last version observed without them, and the
+# ceiling is safe precisely because the historical corpus is a CLOSED SET: no new
+# transcript can ever be written by a 2.1.x CLI, so the rail cannot widen behind us.
+# An unparseable or higher version fails closed, by construction rather than by
+# arithmetic (a bare `int(v.split(".")[2])` would let 2.2.0 and 3.0.1 in).
+_LEGACY_VERSION_CEILING = (2, 1, 160)
+_LEGACY_ENTRYPOINTS = frozenset({"cli", "claude-vscode", "claude-desktop"})
+
+# Whole-turn harness artifacts, refused in EVERY era. Harmless while the legacy rail
+# was shut; load-bearing now that it is open.
+#
+# Both anchor at the START of the turn and never match inside it. Chris PASTING his
+# own terminal output, or quoting a compaction preamble, is testimony -- an
+# unanchored match would silently delete his words, which is the very loss the
+# legacy rail exists to repair.
+_BASH_MODE = re.compile(r"^\s*<bash-(?:input|stdout|stderr)>")
+_COMPACTION_PREAMBLE = (
+    "This session is being continued from a previous conversation that ran out of context"
+)
+
+
+def version_tuple(raw) -> tuple[int, ...] | None:
+    """`"2.1.142"` -> `(2, 1, 142)`. None when it is not a plain dotted release,
+    so callers fail closed instead of guessing at `nightly` or `""`."""
+    if not isinstance(raw, str) or not raw:
+        return None
+    parts = raw.split(".")
+    if not all(p.isdigit() for p in parts):
+        return None
+    return tuple(int(p) for p in parts)
+
 
 @dataclass
 class Turn:
@@ -182,6 +223,10 @@ def is_human_turn(entry: dict) -> tuple[bool, str]:
     text = strip_injections(block_text(entry.get("message", {}).get("content")))
     if text in _HARNESS_BODIES:
         return False, "harness-artifact"
+    if _BASH_MODE.match(text):
+        return False, "bash-mode-artifact"
+    if text.startswith(_COMPACTION_PREAMBLE):
+        return False, "compaction-artifact"
     if entry.get("interruptedByShutdown"):
         return False, "interrupt-artifact"
     if not text:
@@ -192,6 +237,19 @@ def is_human_turn(entry: dict) -> tuple[bool, str]:
         return True, "origin-human"
     if entry.get("promptSource") in _ADMIT_PROMPT_SOURCES:
         return True, "prompt-source"
+
+    # The legacy rail, last and narrowest: a pre-2.1.161 CLI turn carrying neither
+    # field, because that harness wrote neither -- not because something stripped
+    # them. Version-ceilinged so a future field-less harness still fails closed.
+    version = version_tuple(entry.get("version"))
+    if (
+        not origin
+        and entry.get("promptSource") is None
+        and entry.get("entrypoint") in _LEGACY_ENTRYPOINTS
+        and version is not None
+        and version <= _LEGACY_VERSION_CEILING
+    ):
+        return True, "legacy-interactive"
     return False, "unknown-origin"
 
 
