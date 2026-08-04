@@ -14,6 +14,7 @@ clean run.
 """
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -281,6 +282,16 @@ class Idempotency(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = self._repo(Path(tmp), "- nothing here\n")
             self.assertEqual(hs.harvested_uuids(repo), set())
+
+    def test_repo_root_is_the_engine_not_the_skill(self):
+        """REPO_ROOT must point at the engine repo ($ME, default ~/code/me),
+        never at the skill's own folder. Deriving it from __file__ resolved
+        through the global-install symlink to a folder with no knowledge/,
+        so harvested_uuids() returned empty and every session read pending
+        (2026-08-04)."""
+        self.assertNotIn("upstream_skills", str(hs.REPO_ROOT))
+        self.assertNotIn("fact-harvest", str(hs.REPO_ROOT))
+        self.assertEqual(hs.REPO_ROOT.name, os.environ.get("ME", "me").split("/")[-1])
 
     def test_status_precedence(self):
         self.assertEqual(hs.status_of("A", {"a"}, {"a"}), "harvested")

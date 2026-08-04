@@ -44,7 +44,14 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+# The ENGINE repo -- the only place `session:` locators and journal breadcrumbs
+# live. NEVER derived from __file__: this skill ships globally (symlinked under
+# ~/.claude/skills -> ~/code/upstream_skills), so __file__ resolves to the skill
+# folder, which has no knowledge/ -- harvested_uuids() then returns the empty
+# set and EVERY session in history reads "pending" (bug found 2026-08-04: a
+# 250-session inventory that included fully-harvested transcripts). SKILL.md s0
+# defines the root as $ME; honor it, default ~/code/me.
+REPO_ROOT = Path(os.environ.get("ME", Path.home() / "code" / "me"))
 
 # Where the harness parks transcripts. Overridable so tests never touch the real
 # corpus and so a Mac run can point at a copied-down archive.
